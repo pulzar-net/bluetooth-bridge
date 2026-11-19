@@ -173,9 +173,15 @@ impl Hci {
             .unwrap_or_else(|e| e.into_inner())
             .get(&handle)
         {
-            let _ = c.fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| {
-                Some(v.saturating_sub(n))
-            });
+            let mut cur = c.load(Ordering::Acquire);
+            while let Err(now) = c.compare_exchange_weak(
+                cur,
+                cur.saturating_sub(n),
+                Ordering::AcqRel,
+                Ordering::Acquire,
+            ) {
+                cur = now;
+            }
         }
         self.acl_credits.add_permits(usize::from(n));
     }
