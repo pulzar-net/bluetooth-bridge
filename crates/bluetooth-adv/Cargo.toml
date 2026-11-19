@@ -1,0 +1,30 @@
+[package]
+name = "bluetooth-adv"
+description = "Bluetooth LE advertising data: every AD type parsed, and beacon formats (iBeacon, Eddystone, AltBeacon, BTHome v2 with encryption, KKM, Ruuvi) decoded"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["bluetooth", "ble", "beacon", "bthome", "eddystone"]
+categories = ["parser-implementations", "hardware-support"]
+
+[features]
+default = ["serde"]
+serde = ["dep:serde"]
+
+[dependencies]
+bluetooth-numbers.workspace = true
+aes.workspace = true
+ccm.workspace = true
+md-5 = { version = "0.11", default-features = false }
+ruuvi-sensor-protocol.workspace = true
+serde = { workspace = true, optional = true }
+hex.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,52 @@
+[package]
+name = "bluetooth-host"
+description = "A Bluetooth host stack over raw HCI: observer, broadcaster, central and peripheral, L2CAP, ATT and GATT, SMP pairing and bonding, privacy"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["bluetooth", "ble", "hci", "gatt", "smp"]
+categories = ["network-programming", "hardware-support", "asynchronous"]
+
+[features]
+default = ["serial"]
+## H4 over a serial port (UART controllers, the Pi's chip without hciattach).
+serial = ["dep:tokio-serial"]
+## Entry points for the fuzz targets.
+fuzzing = []
+
+[dependencies]
+bluetooth-adv.workspace = true
+bluetooth-numbers.workspace = true
+aes.workspace = true
+bt-hci.workspace = true
+cmac.workspace = true
+embedded-io = { version = "0.7", features = ["alloc"] }
+getrandom.workspace = true
+hex.workspace = true
+p256.workspace = true
+serde = { workspace = true }
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "io-util", "net", "fs"] }
+tokio-serial = { workspace = true, optional = true }
+tracing.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+bt-hci-linux.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "rt-multi-thread", "io-util", "net", "process", "test-util"] }
+tempfile = "3"
+serde_json.workspace = true
+hex.workspace = true
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter"] }
+
+[[test]]
+name = "fuzz_smoke"
+required-features = ["fuzzing"]
+
+[lints]
+workspace = true

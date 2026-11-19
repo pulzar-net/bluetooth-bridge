@@ -1,0 +1,55 @@
+[package]
+name = "bluetooth-bridge-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+bluetooth-adv = { path = "../crates/bluetooth-adv" }
+bluetooth-host = { path = "../crates/bluetooth-host", default-features = false, features = ["fuzzing"] }
+
+[[bin]]
+name = "advertisement"
+path = "fuzz_targets/advertisement.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "h4"
+path = "fuzz_targets/h4.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "hci_event"
+path = "fuzz_targets/hci_event.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "acl"
+path = "fuzz_targets/acl.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "att_server"
+path = "fuzz_targets/att_server.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "smp"
+path = "fuzz_targets/smp.rs"
+test = false
+doc = false
+bench = false

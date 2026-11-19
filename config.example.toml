@@ -1,0 +1,83 @@
+# bluetooth-bridge configuration. Only [adapter] is required.
+
+[adapter]
+# hci0 (Linux HCI user channel; stop bluetoothd first), serial:/dev/ttyACM0:1000000
+# for a UART controller, or tcp:127.0.0.1:9000 for a virtual controller.
+transport = "hci0"
+name = "bluetooth-bridge"
+# display_only, display_yes_no, keyboard_only, no_input_no_output, keyboard_display
+io_capability = "no_input_no_output"
+# A fixed six-digit passkey, shown or typed when a pairing needs one.
+# passkey = 123456
+bonding = true
+mitm = false
+secure_connections_only = false
+# Use a static random address even when the controller has a public one.
+random_address = false
+
+[mqtt]
+host = "localhost"
+port = 1883
+# username = "bluetooth"
+# password_file = "/etc/bluetooth-bridge/mqtt-password"
+client_id = "bluetooth-bridge"
+base_topic = "bluetooth"
+keepalive = 30
+
+[scan]
+enabled = true
+# Active scanning sends scan requests (more data, more airtime).
+active = false
+interval_ms = 100
+window_ms = 100
+# Also scan the coded PHY (long range) when the controller has it.
+coded = true
+filter_accept_list = false
+# off, changes, or { interval_ms = 10000 }: report a device when its data
+# changes and at least this often while it is heard.
+dedup = { interval_ms = 10000 }
+# Only these address prefixes (empty: everything).
+allow = []
+min_rssi = -127
+publish_reports = true
+
+[homeassistant]
+enabled = true
+discovery_prefix = "homeassistant"
+status_topic = "homeassistant/status"
+
+[data]
+# Bonds and the bridge's own identity (IRK, static address), mode 0600.
+dir = "/var/lib/bluetooth-bridge"
+
+# Encrypted BTHome devices.
+# [[bthome_keys]]
+# address = "A4:C1:38:00:00:01"
+# key = "231d39c1d7cc1ab1aee224cd096db932"
+
+# Encrypted KKM sensor frames.
+# [[kkm_passwords]]
+# address = "BC:57:29:00:00:01"
+# password = "0000000000000000"
+
+# Devices whose IRK is known without pairing: their private addresses
+# resolve to this identity.
+# [[irks]]
+# address = "C0:11:22:33:44:55/random"
+# irk = "ec0234a357c8ad05341010a60a397d9b"
+# label = "tag 1"
+
+# A GATT service the bridge serves.
+# [[gatt_services]]
+# uuid = "12345678-1234-5678-1234-56789abcdef0"
+# [[gatt_services.characteristics]]
+# uuid = "12345678-1234-5678-1234-56789abcdef1"
+# properties = ["read", "write", "notify"]
+# read = "open"
+# write = "encrypted"
+# value = "00"
+
+# An advertising set started with the bridge (AD structures, hex).
+# [[advertising]]
+# data = "0201060908627269646765"
+# params = { connectable = true, interval_min_ms = 200, interval_max_ms = 300 }

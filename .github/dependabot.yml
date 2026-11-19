@@ -1,0 +1,23 @@
+# The Bluetooth SIG's assigned numbers (a git submodule), the Rust crates
+# and the actions are bumped here; CI gates every bump.
+version: 2
+updates:
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      rust:
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directory: /tests/bumble
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

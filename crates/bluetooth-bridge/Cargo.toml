@@ -1,0 +1,37 @@
+[package]
+name = "bluetooth-bridge"
+description = "A standalone Bluetooth LE to MQTT bridge with Home Assistant discovery, on the bluetooth-host stack"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["bluetooth", "ble", "mqtt", "home-assistant", "bthome"]
+categories = ["command-line-utilities", "network-programming"]
+
+[[bin]]
+name = "bluetooth-bridge"
+path = "src/main.rs"
+
+[dependencies]
+bluetooth-adv.workspace = true
+bluetooth-host.workspace = true
+hex.workspace = true
+lexopt = "0.3"
+rumqttc = { version = "0.25", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal", "sync", "time", "fs"] }
+toml.workspace = true
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi"] }
+
+[dev-dependencies]
+rumqttd = { version = "0.20", default-features = false }
+tempfile = "3"
+tokio = { workspace = true, features = ["process", "io-util", "rt-multi-thread", "macros", "time", "sync"] }
+
+[lints]
+workspace = true

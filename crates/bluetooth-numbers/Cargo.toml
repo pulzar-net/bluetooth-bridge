@@ -1,0 +1,20 @@
+[package]
+name = "bluetooth-numbers"
+description = "The Bluetooth SIG's Assigned Numbers (company identifiers, UUIDs, appearance, AD types, units), generated at build time from the SIG's public repository"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["bluetooth", "ble", "assigned-numbers", "uuid"]
+categories = ["no-std", "hardware-support"]
+build = "build.rs"
+# The SIG's repository is a git submodule at `sig/`; only the YAML the build reads is packaged.
+include = ["src/**", "build.rs", "sig/assigned_numbers/**/*.yaml", "README.md"]
+
+[build-dependencies]
+yaml-rust2.workspace = true
+
+[lints]
+workspace = true
