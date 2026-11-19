@@ -273,6 +273,28 @@ async fn merges_legacy_scan_responses_in_extended_reports() {
 }
 
 #[tokio::test]
+async fn survives_a_truncated_extended_report() {
+    // Found by fuzzing: bt-hci 0.11 indexes past the end of this one.
+    let (host, chip) = start(bt5()).await;
+    let mut ev = host.events();
+    host.start_scan(ScanConfig {
+        dedup: Dedup::Off,
+        ..ScanConfig::default()
+    })
+    .await
+    .unwrap();
+    chip.event(hex::decode("3e0c0d6666010000000000000a03").unwrap())
+        .await;
+    chip.event(ext_report(0x0000, ADDR, 1, 127, -50, 0, &[2, 1, 6]))
+        .await;
+    assert_eq!(
+        next_report(&mut ev).await.data,
+        vec![2, 1, 6],
+        "the host is still running"
+    );
+}
+
+#[tokio::test]
 async fn duplicate_filtering_by_change_and_interval() {
     let (host, chip) = start(bt5()).await;
     let mut ev = host.events();
