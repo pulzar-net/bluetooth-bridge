@@ -10,7 +10,7 @@
 //! | `base/device/<ADDRESS>` | out | a device's decoded readings, for Home Assistant |
 //! | `base/bridge/event` | out | connections, pairing, notifications, GATT writes, periodic reports |
 //! | `base/bridge/request/<op>` | in | a request, JSON, optionally with a `transaction` id |
-//! | `base/bridge/response/<op>` | out | `{"transaction", "status": "ok"|"error", "data"|"error"}` |
+//! | `base/bridge/response/<op>` | out | `{"transaction", "status", "data" or "error"}`, status `ok` or `error` |
 //!
 //! Addresses in topics are twelve upper-case hex digits, most significant
 //! first (`BC5729000001`).

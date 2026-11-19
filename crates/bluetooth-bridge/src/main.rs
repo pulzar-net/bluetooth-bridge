@@ -17,12 +17,24 @@ Usage: bluetooth-bridge [--config FILE]
 Logging follows RUST_LOG (default info).";
 
 fn main() -> std::process::ExitCode {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+    // RUST_LOG as `info` or `bluetooth_host=debug,info`: per-target levels
+    // without the regex engine EnvFilter needs (it would cost the static
+    // binary hundreds of kilobytes).
+    use tracing_subscriber::layer::SubscriberExt;
+    use tracing_subscriber::util::SubscriberInitExt;
+    let filter: tracing_subscriber::filter::Targets = std::env::var("RUST_LOG")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or_else(|| {
+            tracing_subscriber::filter::Targets::new().with_default(tracing::Level::INFO)
+        });
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_target(false)
+                .with_ansi(false),
         )
-        .with_target(false)
+        .with(filter)
         .init();
     match args() {
         Ok(cmd) => {
