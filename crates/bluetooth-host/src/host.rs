@@ -524,15 +524,10 @@ async fn read_loop(weak: std::sync::Weak<Inner>, mut reader: PacketReader) {
     }
 }
 
-/// Whether bt-hci can parse an event without panicking.
-///
-/// bt-hci 0.11 indexes past the end of a truncated LE Extended Advertising
-/// Report (`param/le.rs`, the secondary PHY byte), which with `panic = abort`
-/// would take the host down on one corrupt event from a noisy UART. Each
-/// report is checked here first: 24 fixed octets, then its data. Remove
-/// once bt-hci checks the length itself (found by our `hci_event` fuzz
-/// target; to be fixed upstream).
-pub(crate) fn parsable(bytes: &[u8]) -> bool {
+/// Rejects malformed HCI events before they are handed to the parser: each
+/// LE Extended Advertising Report must hold its 24 fixed octets and the data
+/// its length names.
+pub(crate) fn well_formed(bytes: &[u8]) -> bool {
     if bytes.first() != Some(&0x3e) || bytes.get(2) != Some(&0x0d) {
         return true;
     }
@@ -553,7 +548,7 @@ pub(crate) fn parsable(bytes: &[u8]) -> bool {
 
 /// Handles one event; returns a reason when the host must stop.
 fn on_event(host: &Host, bytes: &[u8]) -> Option<String> {
-    if !parsable(bytes) {
+    if !well_formed(bytes) {
         tracing::warn!("dropping a malformed extended advertising report");
         return None;
     }

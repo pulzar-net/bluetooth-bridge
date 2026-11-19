@@ -273,8 +273,8 @@ async fn merges_legacy_scan_responses_in_extended_reports() {
 }
 
 #[tokio::test]
-async fn survives_a_truncated_extended_report() {
-    // Found by fuzzing: bt-hci 0.11 indexes past the end of this one.
+async fn rejects_malformed_events() {
+    // A malformed extended advertising report is dropped; scanning goes on.
     let (host, chip) = start(bt5()).await;
     let mut ev = host.events();
     host.start_scan(ScanConfig {

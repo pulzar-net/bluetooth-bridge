@@ -31,7 +31,7 @@ fn seeds() -> Vec<Vec<u8>> {
         h("043e1a0201000166554433221f1100e0201060703666f6f6f6f6f6fc8"),
         h("0510010400ffff28"),
         h("0b0c0800010000000000ffff"),
-        // A truncated extended report that crashed bt-hci 0.11 (fuzz, CI).
+        // A malformed extended advertising report.
         h("3e0c0d6666010000000000000a030100"),
         h("0202010000002000"),
     ]

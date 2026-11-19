@@ -15,7 +15,7 @@ pub fn hci_event(data: &[u8]) {
     use bt_hci::event::le::LeEvent;
     use bt_hci::event::Event;
     use bt_hci::FromHciBytes;
-    if !crate::host::parsable(data) {
+    if !crate::host::well_formed(data) {
         return;
     }
     if let Ok((e, _)) = Event::from_hci_bytes(data) {
