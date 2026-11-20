@@ -32,8 +32,8 @@ cover every type and function.
 
 ## Status
 
-bluetooth-bridge is at 0.x. Version 0.1.0 is Bluetooth LE; Bluetooth Mesh is
-in progress on `main` as a library. Everything is tested in CI against
+bluetooth-bridge is at 0.x. Version 0.1.0 is Bluetooth LE; 0.2.0 adds the
+first part of Bluetooth Mesh, and the rest is in progress. Everything is tested in CI against
 Bumble's virtual controller, but **no release has been tested on real
 hardware yet**. Pages that describe something only real hardware can
 confirm say so.

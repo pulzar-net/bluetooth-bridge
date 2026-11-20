@@ -3,7 +3,7 @@ title: "bluetooth-bridge (crate)"
 description: "The bridge as a library: the same code as the binary."
 ---
 
-The bridge as a library: the same code as the binary. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_bridge/index.html).
+The bridge as a library: the same code as the binary. [crates.io](https://crates.io/crates/bluetooth-bridge), [docs.rs](https://docs.rs/bluetooth-bridge), [API docs for `main`](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_bridge/index.html).
 
 - `run(config)` runs the bridge until it is stopped.
 - `Config` is the configuration file; `Config::load` and `Config::parse`

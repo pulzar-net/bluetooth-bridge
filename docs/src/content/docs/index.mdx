@@ -24,14 +24,14 @@ import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 		{ title: 'Sensors without pairing', body: 'BTHome (encrypted too), Ruuvi, KKM, iBeacon and Eddystone decoded into readings.', icon: 'star', link: '/bluetooth-bridge/sensors.html' },
 		{ title: 'Home Assistant', body: 'Every sensor with readings appears through MQTT discovery.', icon: 'puzzle', link: '/bluetooth-bridge/home-assistant.html' },
 		{ title: 'GATT and pairing over MQTT', body: 'Connect, read, write, subscribe, pair and bond; serve your own GATT services.', icon: 'random', link: '/bluetooth-bridge/connections.html' },
-		{ title: 'Bluetooth Mesh', body: 'The bridge provisions, configures and switches mesh nodes. In progress.', icon: 'seti:graphql', link: '/bluetooth-bridge/roadmap.html' },
+		{ title: 'Bluetooth Mesh', body: 'The bridge provisions, configures and switches mesh nodes, over advertising or a GATT proxy.', icon: 'seti:graphql', link: '/bluetooth-bridge/mqtt.html#bluetooth-mesh' },
 		{ title: 'Tested without hardware', body: 'Every role and pairing method runs against Bumble\'s virtual controllers in CI.', icon: 'laptop', link: '/bluetooth-bridge/testing.html' },
 	]}
 />
 
 ## Install
 
-<ReleaseDownload repo="pulzar-net/bluetooth-bridge" version="0.1.0" binary="bluetooth-bridge" />
+<ReleaseDownload repo="pulzar-net/bluetooth-bridge" version="0.2.0" binary="bluetooth-bridge" />
 
 Then follow [getting started](/bluetooth-bridge/getting-started.html), or
 [install it as a service](/bluetooth-bridge/installation.html).
@@ -45,7 +45,8 @@ bluetooth-bridge is 0.x: every role, pairing method and GATT operation is tested
 		{ feature: 'HCI user channel, H4 over UART and TCP', status: 'done', note: '0.1.0' },
 		{ feature: 'Scanning, advertising, beacons and sensors, Home Assistant discovery', status: 'done', note: '0.1.0' },
 		{ feature: 'Connections, L2CAP, GATT client and server, pairing and bonds, privacy', status: 'done', note: '0.1.0' },
-		{ feature: 'Bluetooth Mesh: provisioner in the bridge, GATT proxy in the library', status: 'progress' },
+		{ feature: 'Bluetooth Mesh: provisioner in the bridge, GATT proxy in the library', status: 'done', note: '0.2.0' },
+		{ feature: 'Bluetooth Mesh: PB-GATT, IV update, relay, friendship, more models', status: 'progress' },
 		{ feature: 'Testing on real controllers', status: 'progress' },
 		{ feature: 'Classic BR/EDR, then direction finding', status: 'planned' },
 	]}

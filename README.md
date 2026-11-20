@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/pulzar-net/bluetooth-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/pulzar-net/bluetooth-bridge/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/pulzar-net/bluetooth-bridge)](https://github.com/pulzar-net/bluetooth-bridge/releases/latest)
+[![crates.io](https://img.shields.io/crates/v/bluetooth-host.svg)](https://crates.io/crates/bluetooth-host)
+[![docs.rs](https://img.shields.io/docsrs/bluetooth-host)](https://docs.rs/bluetooth-host)
 [![Docs](https://img.shields.io/badge/docs-pulzar--net.github.io-blue)](https://pulzar-net.github.io/bluetooth-bridge/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![MSRV](https://img.shields.io/badge/MSRV-1.89-blue)](Cargo.toml)
@@ -31,7 +33,8 @@ directly, the same way on every board.
 
 ## Status
 
-bluetooth-bridge is **0.x and young**. Version 0.1.0 is Bluetooth LE. Every
+bluetooth-bridge is **0.x and young**. Version 0.1.0 is Bluetooth LE; 0.2.0
+adds the first part of Bluetooth Mesh. Every
 role, pairing method and GATT operation is tested in CI against
 [Bumble](https://github.com/google/bumble)'s virtual controller, but **it
 has not yet been tested on real hardware**. Expect rough edges and breaking
@@ -49,7 +52,8 @@ changes between 0.x releases.
 | Pairing: legacy and Secure Connections, every method and IO capability, bonding | done in 0.1.0 |
 | Privacy: private addresses resolved to identities | done in 0.1.0 |
 | Home Assistant MQTT discovery for decoded sensors | done in 0.1.0 |
-| Bluetooth Mesh: the bridge as provisioner over the advertising bearer; the GATT proxy in the library | in progress on `main` |
+| Bluetooth Mesh: the bridge as provisioner over the advertising bearer; the GATT proxy in the library | done in 0.2.0 |
+| Bluetooth Mesh, the rest: PB-GATT, IV update, relay, friendship, more models | in progress |
 | Testing on real controllers | in progress |
 | Classic BR/EDR (inquiry, SDP, RFCOMM) | planned |
 | Direction finding (AoA, AoD) and channel sounding | planned |
@@ -89,7 +93,7 @@ example Mosquitto) that Home Assistant's MQTT integration already uses.
 
 <!-- quickstart:download -->
 ```sh
-VERSION=0.1.0
+VERSION=0.2.0
 ARCH=$(uname -m)   # x86_64 or aarch64
 BASE=https://github.com/pulzar-net/bluetooth-bridge/releases/download/v$VERSION
 curl -fsSLO "$BASE/bluetooth-bridge-$ARCH-linux-musl"
@@ -170,7 +174,7 @@ default (`--config FILE` to change it):
 | `[data]` | the data directory: bonds and the bridge's own identity |
 | `[[bthome_keys]]`, `[[kkm_passwords]]`, `[[irks]]` | keys for encrypted sensors and for resolving private addresses |
 | `[[gatt_services]]`, `[[advertising]]` | GATT services the bridge serves and advertising sets it starts |
-| `[mesh]` | Bluetooth Mesh provisioner (not in 0.1.0) |
+| `[mesh]` | Bluetooth Mesh provisioner (since 0.2.0) |
 
 Unknown keys are an error, so a typo stops the bridge at startup. Every key,
 its type and default are in the
@@ -202,19 +206,17 @@ has every request and payload with examples.
 
 The bridge is a thin layer over library crates you can use on their own.
 
-| Crate | What it is |
-|---|---|
-| [`bluetooth-host`](crates/bluetooth-host) | the host stack: transports, scanning, advertising, connections, L2CAP, ATT and GATT, SMP, privacy, bonds |
-| [`bluetooth-adv`](crates/bluetooth-adv) | advertising data: every AD type, and beacon and sensor formats; no I/O |
-| [`bluetooth-numbers`](crates/bluetooth-numbers) | the Bluetooth SIG's assigned numbers as lookups, generated from the SIG's repository |
-| [`bluetooth-mesh-stack`](crates/bluetooth-mesh-stack) | Bluetooth Mesh (work in progress) |
-| [`bluetooth-bridge`](crates/bluetooth-bridge) | the MQTT bridge, as a binary and a library |
+| Crate | What it is | |
+|---|---|---|
+| [`bluetooth-host`](crates/bluetooth-host) | the host stack: transports, scanning, advertising, connections, L2CAP, ATT and GATT, SMP, privacy, bonds | [crates.io](https://crates.io/crates/bluetooth-host), [docs.rs](https://docs.rs/bluetooth-host) |
+| [`bluetooth-adv`](crates/bluetooth-adv) | advertising data: every AD type, and beacon and sensor formats; no I/O | [crates.io](https://crates.io/crates/bluetooth-adv), [docs.rs](https://docs.rs/bluetooth-adv) |
+| [`bluetooth-numbers`](crates/bluetooth-numbers) | the Bluetooth SIG's assigned numbers as lookups, generated from the SIG's repository | [crates.io](https://crates.io/crates/bluetooth-numbers), [docs.rs](https://docs.rs/bluetooth-numbers) |
+| [`bluetooth-mesh-stack`](crates/bluetooth-mesh-stack) | Bluetooth Mesh: provisioning, configuration, the advertising and GATT proxy bearers | [crates.io](https://crates.io/crates/bluetooth-mesh-stack), [docs.rs](https://docs.rs/bluetooth-mesh-stack) |
+| [`bluetooth-bridge`](crates/bluetooth-bridge) | the MQTT bridge, as a binary and a library | [crates.io](https://crates.io/crates/bluetooth-bridge), [docs.rs](https://docs.rs/bluetooth-bridge) |
 
-The crates are not on crates.io yet; depend on them from git:
-
-```toml
-[dependencies]
-bluetooth-adv = { git = "https://github.com/pulzar-net/bluetooth-bridge", tag = "v0.1.0" }
+```sh
+cargo add bluetooth-adv            # or bluetooth-host, bluetooth-numbers, bluetooth-mesh-stack
+cargo install bluetooth-bridge     # the bridge binary, built from source
 ```
 
 This example decodes a BTHome v2 temperature and humidity advertisement,
@@ -295,10 +297,10 @@ a Rust library that behaves the same on every board.
 
 ## Roadmap
 
-- **Next:** Bluetooth Mesh (in progress on `main`: the bridge provisions,
-  configures and switches nodes over the advertising bearer; next come
-  PB-GATT, IV update, relay, friendship, more models), and the first reports
-  from real hardware.
+- **Next:** the rest of Bluetooth Mesh (0.2.0 provisions, configures and
+  switches nodes over the advertising bearer and through a GATT proxy; next
+  come PB-GATT, IV update, relay, friendship, more models), and the first
+  reports from real hardware.
 - **After that:** Classic BR/EDR (inquiry, Secure Simple Pairing, SDP,
   RFCOMM), then direction finding.
 

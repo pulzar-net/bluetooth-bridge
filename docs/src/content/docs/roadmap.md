@@ -1,11 +1,11 @@
 ---
 title: "Roadmap: the milestones after LE"
-description: "Milestone 1 is Bluetooth LE, released as 0.1.0 (see the README)."
+description: "Milestone 1 is Bluetooth LE, released as 0.1.0; milestone 2, Bluetooth Mesh, began in 0.2.0."
 ---
 
 Milestone 1 is Bluetooth LE, released as 0.1.0 (see the
 [README](https://github.com/pulzar-net/bluetooth-bridge#readme)). Milestone 2,
-Bluetooth Mesh, is in progress on `main`. These are designed
+Bluetooth Mesh, has its first part in 0.2.0 and the rest in progress. These are designed
 now so that nothing in milestone 1 has to be undone to reach them. LE Audio
 (isochronous channels, LC3) is out of scope until someone needs it.
 
@@ -29,7 +29,7 @@ now so that nothing in milestone 1 has to be undone to reach them. LE Audio
 
 ## Milestone 2: Bluetooth Mesh
 
-**Status (in progress on `main`).** Built: the advertising bearer; the GATT
+**Status: first part released in 0.2.0, the rest in progress.** Built: the advertising bearer; the GATT
 proxy bearer as client (`ProxyBearer`) and server (`ProxyServer`, one client,
 accept and reject filters); network PDU encryption and obfuscation, the
 message cache, and sequence numbers persisted with headroom; segmentation

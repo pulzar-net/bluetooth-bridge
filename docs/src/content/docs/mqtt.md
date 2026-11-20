@@ -202,7 +202,7 @@ On `bluetooth/bridge/event`, each with a `type`:
 
 ## Bluetooth Mesh
 
-Not in 0.1.0. With `[mesh] enabled = true`, the bridge is the provisioner of
+Since 0.2.0. With `[mesh] enabled = true`, the bridge is the provisioner of
 a mesh network of its own, kept in `<data dir>/mesh`, over the advertising
 bearer. Requests go to `bluetooth/bridge/request/mesh/<op>` and answers come
 on `bluetooth/bridge/response/mesh/<op>`:

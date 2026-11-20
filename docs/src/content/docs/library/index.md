@@ -11,7 +11,7 @@ the thinnest layer on top; everything else can be used without it.
 | [bluetooth-host](/bluetooth-bridge/library/bluetooth-host.html) | the host stack | scan, advertise, connect, use GATT and pair from Rust, on any controller |
 | [bluetooth-adv](/bluetooth-bridge/library/bluetooth-adv.html) | advertising data | parse advertisements and decode beacons and sensors, with no I/O |
 | [bluetooth-numbers](/bluetooth-bridge/library/bluetooth-numbers.html) | assigned numbers | name companies, UUIDs, appearances and AD types |
-| [bluetooth-mesh-stack](/bluetooth-bridge/library/bluetooth-mesh-stack.html) | Bluetooth Mesh | provision and control mesh nodes (work in progress) |
+| [bluetooth-mesh-stack](/bluetooth-bridge/library/bluetooth-mesh-stack.html) | Bluetooth Mesh | provision, configure and control mesh nodes |
 | [bluetooth-bridge](/bluetooth-bridge/library/bluetooth-bridge.html) | MQTT bridge | run or embed the bridge itself |
 
 The [API documentation](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html) covers every public
@@ -19,11 +19,10 @@ item.
 
 ## Depending on the crates
 
-The crates are not published on crates.io yet. Depend on a release tag:
+Every crate is on [crates.io](https://crates.io/search?q=bluetooth-bridge), with its API on docs.rs:
 
-```toml
-[dependencies]
-bluetooth-host = { git = "https://github.com/pulzar-net/bluetooth-bridge", tag = "v0.1.0" }
+```sh
+cargo add bluetooth-host
 ```
 
 Every crate shares the workspace version and is released together. While

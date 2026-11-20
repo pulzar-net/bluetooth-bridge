@@ -3,8 +3,8 @@ title: "bluetooth-mesh-stack"
 description: "Bluetooth Mesh on the bluetooth-host stack."
 ---
 
-Bluetooth Mesh on the bluetooth-host stack. **Work in progress** on `main`,
-not in a release; the API will change. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh_stack/index.html).
+Bluetooth Mesh on the bluetooth-host stack. New in 0.2.0, and still growing
+(PB-GATT, IV update, relay and friendship come next), so its API will change. [crates.io](https://crates.io/crates/bluetooth-mesh-stack), [docs.rs](https://docs.rs/bluetooth-mesh-stack), [API docs for `main`](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh_stack/index.html).
 
 What is there:
 
