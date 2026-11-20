@@ -207,7 +207,7 @@ The bridge is a thin layer over library crates you can use on their own.
 | [`bluetooth-host`](crates/bluetooth-host) | the host stack: transports, scanning, advertising, connections, L2CAP, ATT and GATT, SMP, privacy, bonds |
 | [`bluetooth-adv`](crates/bluetooth-adv) | advertising data: every AD type, and beacon and sensor formats; no I/O |
 | [`bluetooth-numbers`](crates/bluetooth-numbers) | the Bluetooth SIG's assigned numbers as lookups, generated from the SIG's repository |
-| [`bluetooth-mesh`](crates/bluetooth-mesh) | Bluetooth Mesh (work in progress) |
+| [`bluetooth-mesh-stack`](crates/bluetooth-mesh-stack) | Bluetooth Mesh (work in progress) |
 | [`bluetooth-bridge`](crates/bluetooth-bridge) | the MQTT bridge, as a binary and a library |
 
 The crates are not on crates.io yet; depend on them from git:

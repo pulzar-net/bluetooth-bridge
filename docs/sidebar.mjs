@@ -69,8 +69,8 @@ export default [
 				"slug": "library/bluetooth-numbers"
 			},
 			{
-				"label": "bluetooth-mesh",
-				"slug": "library/bluetooth-mesh"
+				"label": "bluetooth-mesh-stack",
+				"slug": "library/bluetooth-mesh-stack"
 			},
 			{
 				"label": "bluetooth-bridge",

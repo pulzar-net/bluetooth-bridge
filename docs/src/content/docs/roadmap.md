@@ -45,7 +45,7 @@ other Generic models and the Sensor client, and Node Identity advertising.
 
 The plan:
 
-A crate `bluetooth-mesh` on the host:
+A crate `bluetooth-mesh-stack` on the host:
 
 - **Bearers**: the advertising bearer (Mesh Message, Mesh Beacon and PB-ADV
   AD types, sent through an advertising set and heard through the scanner

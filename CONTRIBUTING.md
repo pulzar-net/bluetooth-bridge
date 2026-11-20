@@ -109,7 +109,7 @@ A new parser needs a new fuzz target, and a case in the stable smoke pass.
 
 - One logical change per commit. The subject line says what the change does,
   in plain words, under 72 characters, for example
-  `bluetooth-mesh: GATT proxy client (ProxyBearer)`; the body says why.
+  `bluetooth-mesh-stack: GATT proxy client (ProxyBearer)`; the body says why.
 - Add a line to `CHANGELOG.md` under `[Unreleased]` for anything a user or a
   library user would notice.
 - Update the README and `docs/` when you change behavior, a configuration

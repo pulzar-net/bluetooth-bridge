@@ -1,10 +1,10 @@
 ---
-title: "bluetooth-mesh"
+title: "bluetooth-mesh-stack"
 description: "Bluetooth Mesh on the bluetooth-host stack."
 ---
 
 Bluetooth Mesh on the bluetooth-host stack. **Work in progress** on `main`,
-not in a release; the API will change. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh/index.html).
+not in a release; the API will change. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh_stack/index.html).
 
 What is there:
 

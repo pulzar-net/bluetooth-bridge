@@ -13,7 +13,11 @@ export default defineConfig({
 	base: '/bluetooth-bridge',
 	// Pages are page.html, the URLs the earlier mdBook site had.
 	build: { format: 'file' },
-	redirects: { '/library/index': '/bluetooth-bridge/library.html' },
+	redirects: {
+		'/library/index': '/bluetooth-bridge/library.html',
+		// The crate was bluetooth-mesh before it was published.
+		'/library/bluetooth-mesh': '/bluetooth-bridge/library/bluetooth-mesh-stack.html',
+	},
 	integrations: [
 		starlight({
 			title: 'bluetooth-bridge',

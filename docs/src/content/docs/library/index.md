@@ -11,7 +11,7 @@ the thinnest layer on top; everything else can be used without it.
 | [bluetooth-host](/bluetooth-bridge/library/bluetooth-host.html) | the host stack | scan, advertise, connect, use GATT and pair from Rust, on any controller |
 | [bluetooth-adv](/bluetooth-bridge/library/bluetooth-adv.html) | advertising data | parse advertisements and decode beacons and sensors, with no I/O |
 | [bluetooth-numbers](/bluetooth-bridge/library/bluetooth-numbers.html) | assigned numbers | name companies, UUIDs, appearances and AD types |
-| [bluetooth-mesh](/bluetooth-bridge/library/bluetooth-mesh.html) | Bluetooth Mesh | provision and control mesh nodes (work in progress) |
+| [bluetooth-mesh-stack](/bluetooth-bridge/library/bluetooth-mesh-stack.html) | Bluetooth Mesh | provision and control mesh nodes (work in progress) |
 | [bluetooth-bridge](/bluetooth-bridge/library/bluetooth-bridge.html) | MQTT bridge | run or embed the bridge itself |
 
 The [API documentation](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html) covers every public

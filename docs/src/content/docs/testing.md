@@ -34,7 +34,7 @@ Bumble device on the same link as the other side:
   resolution;
 - `crates/bluetooth-bridge/tests/mqtt.rs`: the bridge with an MQTT broker:
   advertisements, readings, Home Assistant discovery, and requests;
-- `crates/bluetooth-mesh/tests/bumble.rs`: provisioning, configuration and
+- `crates/bluetooth-mesh-stack/tests/bumble.rs`: provisioning, configuration and
   control of mesh nodes over the advertising bearer and through a proxy, on
   two controllers;
 - `ci/quickstart.sh`: the README's quick start as written, with the release
