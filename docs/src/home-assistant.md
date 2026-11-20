@@ -44,8 +44,10 @@ Discovery topics have the form
 
 ## Several bridges
 
-Discovery ids are per sensor, not per bridge, and the bridge's own device has
-a fixed id. Two bridges on one broker that hear the same sensor publish the
-same entity, and the last one wins. If you run several bridges, keep
-discovery on in one of them (`homeassistant.enabled = false` in the others),
-and give each its own `mqtt.base_topic` and `mqtt.client_id`.
+Give each bridge its own `mqtt.base_topic` and `mqtt.client_id`. Each
+bridge is then a Home Assistant device of its own (`bluetooth_bridge` for
+the default base topic, `bluetooth_bridge_<base topic>` for others), and
+its sensors point at it. A sensor is identified by its address, not by the
+bridge, so a sensor that two bridges hear is one Home Assistant device,
+updated by whichever bridge heard it last. (In 0.1.0 the bridge's own
+device id was fixed, so two bridges also shared that device.)

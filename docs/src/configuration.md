@@ -35,6 +35,7 @@ complete and check the file. Point it at the schema with a first line of:
 | `[[irks]]` | IRKs of devices known without pairing, so their private addresses resolve |
 | `[[gatt_services]]` | GATT services the bridge serves to centrals |
 | `[[advertising]]` | advertising sets started with the bridge |
+| `[mesh]` | (not in 0.1.0) make the bridge a Bluetooth Mesh provisioner |
 
 ## Transports
 

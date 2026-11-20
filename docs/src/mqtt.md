@@ -197,6 +197,27 @@ On `bluetooth/bridge/event`, each with a `type`:
 | `advertising_stopped` | `set`, `connection` (when a central connected) |
 | `scan_request` | `set`, `scanner` |
 
+## Bluetooth Mesh
+
+Not in 0.1.0. With `[mesh] enabled = true`, the bridge is the provisioner of
+a mesh network of its own, kept in `<data dir>/mesh`, over the advertising
+bearer. Requests go to `bluetooth/bridge/request/mesh/<op>` and answers come
+on `bluetooth/bridge/response/mesh/<op>`:
+
+| Op | Fields | Data |
+|---|---|---|
+| `mesh/network` | | the bridge's address, the IV index, and the nodes |
+| `mesh/unprovisioned` | | unprovisioned device beacons heard, newest first |
+| `mesh/provision` | `uuid`, optional `static_oob` | the new node |
+| `mesh/configure` | `address` | the node's Composition Data |
+| `mesh/onoff` | `address`, `on` | |
+
+Events come on `bluetooth/mesh/event`: `{"type": "unprovisioned", "uuid", "oob_info"}`
+for a new device beacon, and `{"type": "message", "src", "dst", "opcode", "params"}`
+for each access message. Mesh advertisements are not published as `scan/`
+reports, and the bridge adds the Mesh AD types to `scan.always_report` so
+duplicate filtering never drops them.
+
 ## Home Assistant topics
 
 With `homeassistant.enabled` (the default), the bridge also publishes

@@ -49,7 +49,7 @@ changes between 0.x releases.
 | Pairing: legacy and Secure Connections, every method and IO capability, bonding | done in 0.1.0 |
 | Privacy: private addresses resolved to identities | done in 0.1.0 |
 | Home Assistant MQTT discovery for decoded sensors | done in 0.1.0 |
-| Bluetooth Mesh (`bluetooth-mesh` crate) | in progress on `main`, library only |
+| Bluetooth Mesh: the bridge as provisioner over the advertising bearer; the GATT proxy in the library | in progress on `main` |
 | Testing on real controllers | in progress |
 | Classic BR/EDR (inquiry, SDP, RFCOMM) | planned |
 | Direction finding (AoA, AoD) and channel sounding | planned |
@@ -170,6 +170,7 @@ default (`--config FILE` to change it):
 | `[data]` | the data directory: bonds and the bridge's own identity |
 | `[[bthome_keys]]`, `[[kkm_passwords]]`, `[[irks]]` | keys for encrypted sensors and for resolving private addresses |
 | `[[gatt_services]]`, `[[advertising]]` | GATT services the bridge serves and advertising sets it starts |
+| `[mesh]` | Bluetooth Mesh provisioner (not in 0.1.0) |
 
 Unknown keys are an error, so a typo stops the bridge at startup. Every key,
 its type and default are in the
@@ -294,14 +295,15 @@ a Rust library that behaves the same on every board.
 
 ## Roadmap
 
-- **Next:** Bluetooth Mesh (provisioning, configuration, Generic models,
-  the proxy, in progress on `main`) and the first reports from real hardware.
+- **Next:** Bluetooth Mesh (in progress on `main`: the bridge provisions,
+  configures and switches nodes over the advertising bearer; next come
+  PB-GATT, IV update, relay, friendship, more models), and the first reports
+  from real hardware.
 - **After that:** Classic BR/EDR (inquiry, Secure Simple Pairing, SDP,
   RFCOMM), then direction finding.
 
 The [roadmap page](https://pulzar-net.github.io/bluetooth-bridge/roadmap.html)
-has the design for each. Ideas and requests go in
-[issues](https://github.com/pulzar-net/bluetooth-bridge/issues).
+has the design for each. Questions go in [Discussions](https://github.com/pulzar-net/bluetooth-bridge/discussions); bugs and requests in [issues](https://github.com/pulzar-net/bluetooth-bridge/issues).
 
 ## Contributing
 

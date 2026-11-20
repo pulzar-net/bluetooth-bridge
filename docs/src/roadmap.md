@@ -19,11 +19,28 @@ now so that nothing in milestone 1 has to be undone to reach them. LE Audio
   and its modes beside it.
 - The key store keeps bonds by identity; it grows a BR/EDR link key field
   and Mesh keeps its own store beside it.
-- `bluetooth-numbers` already generates the Mesh opcodes, model, beacon,
-  provisioning and proxy PDU numbers and the SDP/service class UUIDs from the
-  SIG's repository; each milestone adds tables, not hand-typed constants.
+- `bluetooth-numbers` already generates the Mesh opcodes and model ids from
+  the SIG's repository; each milestone adds tables where the SIG publishes
+  them (the Mesh Protocol's own numbers are not in the SIG's repository, so
+  they are constants from the specification).
 
 ## Milestone 2: Bluetooth Mesh
+
+**Status (in progress on `main`).** Built: the advertising bearer; the GATT
+proxy bearer as client (`ProxyBearer`) and server (`ProxyServer`, one client,
+accept and reject filters); network PDU encryption and obfuscation, the
+message cache, and sequence numbers persisted with headroom; segmentation
+and reassembly with block acknowledgments; the provisioner and the device
+side over PB-ADV with every authentication method; the Configuration Server
+subset a provisioner needs (Composition Data, AppKey Add, Model App Bind);
+the client messages (subscription add, publication set, OnOff, Level); the
+Generic OnOff Server; and, in the bridge, provisioning, configuration and
+OnOff over MQTT (`[mesh] enabled`). Tested against the specification's
+sample data and end to end on Bumble. Not built yet: PB-GATT, the IV update
+procedure, the specification's SAR timers, relay, friendship, Health, the
+other Generic models and the Sensor client, and Node Identity advertising.
+
+The plan:
 
 A crate `bluetooth-mesh` on the host:
 

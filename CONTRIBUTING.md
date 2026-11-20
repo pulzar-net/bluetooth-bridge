@@ -9,6 +9,8 @@ through [private reporting](SECURITY.md), never a public issue.
 
 ## Before you start
 
+- **Questions** (how do I, is this expected): ask in
+  [Discussions](https://github.com/pulzar-net/bluetooth-bridge/discussions).
 - **Hardware reports and sensor requests:** use the
   [device or hardware form](https://github.com/pulzar-net/bluetooth-bridge/issues/new?template=device.yml).
   For a sensor, a few of its `bluetooth/scan/<ADDRESS>` messages are what we
@@ -114,7 +116,10 @@ A new parser needs a new fuzz target, and a case in the stable smoke pass.
   key or an MQTT topic.
 - Sign off every commit (see below).
 
-CI must pass before a pull request is merged.
+CI must pass before a pull request is merged: the tests, fuzzing and the
+cross builds. Pull requests are squash-merged, so the pull
+request's title and description become the commit on `main`: write them
+as you would a commit message.
 
 ## Developer Certificate of Origin
 

@@ -16,5 +16,6 @@ What is there:
 - a runtime that provisions, configures and controls nodes, and runs as a
   node, over the advertising bearer or GATT through the Mesh Proxy service.
 
-It is tested end to end on two Bumble controllers. The bridge does not
-expose Mesh on MQTT yet; see the [roadmap](../roadmap.md).
+It is tested end to end on two Bumble controllers. The bridge uses it as a
+provisioner (`[mesh] enabled`, see the [MQTT API](../mqtt.md#bluetooth-mesh));
+the [roadmap](../roadmap.md) lists what is built and what comes next.

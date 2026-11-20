@@ -69,6 +69,7 @@ yet; Classic BR/EDR is on the [roadmap](roadmap.md).
 `serial:` and `tcp:` transports work wherever the bridge builds, but there
 are no release binaries for other systems.
 
-**Where do I ask a question?** Open an
-[issue](https://github.com/pulzar-net/bluetooth-bridge/issues). For security
+**Where do I ask a question?** In
+[Discussions](https://github.com/pulzar-net/bluetooth-bridge/discussions).
+Bugs go in [issues](https://github.com/pulzar-net/bluetooth-bridge/issues). For security
 problems, see [SECURITY.md](https://github.com/pulzar-net/bluetooth-bridge/blob/main/SECURITY.md).
