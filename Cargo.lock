@@ -299,6 +299,7 @@ version = "0.1.0"
 dependencies = [
  "aes",
  "bluetooth-host",
+ "bluetooth-numbers",
  "ccm",
  "cmac",
  "crc",

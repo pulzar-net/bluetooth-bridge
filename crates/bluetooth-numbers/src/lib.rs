@@ -195,6 +195,20 @@ pub fn format_type(value: u8) -> Option<(&'static str, &'static str)> {
         .map(|i| (FORMAT_TYPES[i].1, FORMAT_TYPES[i].2))
 }
 
+/// The name of a Mesh message opcode (1, 2 or 3 octets, as a number:
+/// `0x8201` is Generic OnOff Get).
+pub fn mesh_opcode(opcode: u32) -> Option<&'static str> {
+    MESH_OPCODES
+        .binary_search_by_key(&opcode, |e| e.0)
+        .ok()
+        .map(|i| MESH_OPCODES[i].1)
+}
+
+/// The name of a SIG Mesh model.
+pub fn mesh_model(id: u16) -> Option<&'static str> {
+    find(MESH_MODELS, id)
+}
+
 /// An Appearance value, split into its category and subcategory.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Appearance {
@@ -248,5 +262,9 @@ mod tests {
         assert_eq!(a.category, Some("Watch"));
         assert_eq!(a.subcategory, Some("Sports Watch"));
         assert_eq!(uuid16(0x2a19).unwrap().kind, UuidKind::Characteristic);
+        assert_eq!(mesh_opcode(0x8201), Some("Generic OnOff Get"));
+        assert_eq!(mesh_opcode(0x00), Some("Config AppKey Add"));
+        assert_eq!(mesh_model(0x0000), Some("Configuration Server"));
+        assert_eq!(mesh_model(0x1000), Some("Generic OnOff Server"));
     }
 }

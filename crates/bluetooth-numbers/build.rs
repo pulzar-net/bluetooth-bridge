@@ -136,6 +136,35 @@ fn main() {
     table_u16(&mut out, "APPEARANCE_CATEGORIES", &cats);
     table_u16(&mut out, "APPEARANCE_SUBCATEGORIES", &subs);
 
+    // Mesh opcodes and model identifiers, foundation and models alike.
+    let mut ops = BTreeMap::new();
+    let mut models = BTreeMap::new();
+    let mesh = root.join("mesh");
+    let mut files: Vec<_> = fs::read_dir(&mesh)
+        .unwrap()
+        .flatten()
+        .map(|e| e.file_name().into_string().unwrap())
+        .collect();
+    files.sort();
+    for f in files {
+        let rel = format!("mesh/{f}");
+        if f.ends_with("_opcodes.yaml") && !f.contains("transport_control") {
+            for e in list(&root, &rel, "mesh_model_opcodes") {
+                ops.insert(int(&e["opcode"]) as u32, string(&e["name"]));
+            }
+        } else if f.ends_with("_model_uuids.yaml") {
+            for e in list(&root, &rel, "mesh_model_uuids") {
+                models.insert(int(&e["uuid"]) as u16, string(&e["name"]));
+            }
+        }
+    }
+    writeln!(out, "pub(crate) static MESH_OPCODES: &[(u32, &str)] = &[").unwrap();
+    for (k, v) in &ops {
+        writeln!(out, "    (0x{k:06x}, {v:?}),").unwrap();
+    }
+    out.push_str("];\n\n");
+    table_u16(&mut out, "MESH_MODELS", &models);
+
     let dest = PathBuf::from(env::var("OUT_DIR").unwrap()).join("tables.rs");
     fs::write(dest, out).unwrap();
 }
