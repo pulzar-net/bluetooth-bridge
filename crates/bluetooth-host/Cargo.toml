@@ -16,6 +16,9 @@ default = ["serial"]
 serial = ["dep:tokio-serial"]
 ## Entry points for the fuzz targets.
 fuzzing = []
+## JSON Schema for the types a configuration file holds (scan, advertising,
+## GATT service definitions), for the bridge's generated configuration reference.
+schema = ["dep:schemars"]
 
 [dependencies]
 bluetooth-adv.workspace = true
@@ -33,6 +36,7 @@ thiserror.workspace = true
 tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "io-util", "net", "fs"] }
 tokio-serial = { workspace = true, optional = true }
 tracing.workspace = true
+schemars = { version = "1", optional = true, features = ["preserve_order"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bt-hci-linux.workspace = true

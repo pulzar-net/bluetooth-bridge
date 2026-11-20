@@ -31,6 +31,7 @@ use crate::host::{raw6, Host, HostEvent};
 
 /// How to treat repeats of the same advertisement.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Dedup {
     /// Report every advertisement received.
@@ -44,6 +45,7 @@ pub enum Dedup {
 
 /// How to scan.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default)]
 pub struct ScanConfig {
     /// Send scan requests to get scan responses.

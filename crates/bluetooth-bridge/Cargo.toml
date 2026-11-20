@@ -14,7 +14,13 @@ categories = ["command-line-utilities", "network-programming"]
 name = "bluetooth-bridge"
 path = "src/main.rs"
 
+[features]
+## Derive a JSON Schema for the configuration, from which the docs' configuration
+## reference is generated (tests/config_reference.rs).
+schema = ["dep:schemars", "bluetooth-host/schema"]
+
 [dependencies]
+schemars = { version = "1", optional = true, features = ["preserve_order"] }
 bluetooth-adv.workspace = true
 bluetooth-host.workspace = true
 hex.workspace = true
@@ -32,6 +38,10 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["f
 rumqttd = { version = "0.20", default-features = false }
 tempfile = "3"
 tokio = { workspace = true, features = ["process", "io-util", "rt-multi-thread", "macros", "time", "sync"] }
+
+[[test]]
+name = "config_reference"
+required-features = ["schema"]
 
 [lints]
 workspace = true

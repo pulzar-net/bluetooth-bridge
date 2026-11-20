@@ -35,6 +35,7 @@ pub enum Role {
 
 /// A PHY.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Phy {
     /// LE 1M.

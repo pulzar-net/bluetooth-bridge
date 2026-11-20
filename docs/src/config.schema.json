@@ -1,0 +1,769 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Config",
+  "description": "The whole file.",
+  "type": "object",
+  "properties": {
+    "adapter": {
+      "description": "The controller.",
+      "$ref": "#/$defs/AdapterConfig"
+    },
+    "mqtt": {
+      "description": "The broker.",
+      "$ref": "#/$defs/MqttConfig",
+      "default": {
+        "host": "localhost",
+        "port": 1883,
+        "username": null,
+        "password_file": null,
+        "client_id": "bluetooth-bridge",
+        "base_topic": "bluetooth",
+        "keepalive": 30
+      }
+    },
+    "scan": {
+      "description": "Scanning.",
+      "$ref": "#/$defs/ScanSection",
+      "default": {
+        "enabled": true,
+        "active": false,
+        "interval_ms": 100,
+        "window_ms": 100,
+        "coded": true,
+        "filter_accept_list": false,
+        "dedup": {
+          "interval_ms": 10000
+        },
+        "allow": [],
+        "min_rssi": -127,
+        "publish_reports": true
+      }
+    },
+    "homeassistant": {
+      "description": "Home Assistant discovery.",
+      "$ref": "#/$defs/HomeAssistantConfig",
+      "default": {
+        "enabled": true,
+        "discovery_prefix": "homeassistant",
+        "status_topic": "homeassistant/status"
+      }
+    },
+    "data": {
+      "description": "Where bonds and the local identity live.",
+      "$ref": "#/$defs/DataConfig",
+      "default": {
+        "dir": "/var/lib/bluetooth-bridge"
+      }
+    },
+    "bthome_keys": {
+      "description": "BTHome bind keys, for encrypted BTHome devices.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/KeyEntry"
+      },
+      "default": []
+    },
+    "kkm_passwords": {
+      "description": "KKM beacon passwords, for encrypted KKM sensor frames.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PasswordEntry"
+      },
+      "default": []
+    },
+    "irks": {
+      "description": "IRKs of devices known without pairing, so their private addresses resolve.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/IrkEntry"
+      },
+      "default": []
+    },
+    "gatt_services": {
+      "description": "GATT services the bridge serves.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ServiceDef"
+      },
+      "default": []
+    },
+    "advertising": {
+      "description": "Advertising sets started with the bridge.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AdvertisingEntry"
+      },
+      "default": []
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "adapter"
+  ],
+  "$defs": {
+    "AdapterConfig": {
+      "description": "The controller.",
+      "type": "object",
+      "properties": {
+        "transport": {
+          "description": "`hci0`, `serial:/dev/ttyAMA0:115200`, or `tcp:host:port`.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The GAP device name.",
+          "type": "string",
+          "default": "bluetooth-bridge"
+        },
+        "appearance": {
+          "description": "The GAP appearance.",
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 0
+        },
+        "io_capability": {
+          "description": "Input and output capabilities for pairing.",
+          "$ref": "#/$defs/IoCapability",
+          "default": "no_input_no_output"
+        },
+        "passkey": {
+          "description": "A fixed passkey to show and type when pairing needs one (six digits).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0,
+          "default": null
+        },
+        "bonding": {
+          "description": "Bond when pairing.",
+          "type": "boolean",
+          "default": true
+        },
+        "mitm": {
+          "description": "Require MITM protection.",
+          "type": "boolean",
+          "default": false
+        },
+        "secure_connections_only": {
+          "description": "Refuse legacy pairing.",
+          "type": "boolean",
+          "default": false
+        },
+        "random_address": {
+          "description": "Use a static random address even when the controller has a public one.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "transport"
+      ]
+    },
+    "IoCapability": {
+      "description": "Input and output capabilities.",
+      "oneOf": [
+        {
+          "description": "Can show six digits.",
+          "type": "string",
+          "const": "display_only"
+        },
+        {
+          "description": "Can show six digits and take yes or no.",
+          "type": "string",
+          "const": "display_yes_no"
+        },
+        {
+          "description": "Can take six digits.",
+          "type": "string",
+          "const": "keyboard_only"
+        },
+        {
+          "description": "Neither.",
+          "type": "string",
+          "const": "no_input_no_output"
+        },
+        {
+          "description": "Can show and take digits.",
+          "type": "string",
+          "const": "keyboard_display"
+        }
+      ]
+    },
+    "MqttConfig": {
+      "description": "The broker.",
+      "type": "object",
+      "properties": {
+        "host": {
+          "description": "Host name.",
+          "type": "string",
+          "default": "localhost"
+        },
+        "port": {
+          "description": "Port.",
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 1883
+        },
+        "username": {
+          "description": "User name.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "password_file": {
+          "description": "A file holding the password (so it is not in this file).",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "client_id": {
+          "description": "Client id.",
+          "type": "string",
+          "default": "bluetooth-bridge"
+        },
+        "base_topic": {
+          "description": "Every topic starts with this.",
+          "type": "string",
+          "default": "bluetooth"
+        },
+        "keepalive": {
+          "description": "Keep-alive, seconds.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0,
+          "default": 30
+        }
+      },
+      "additionalProperties": false
+    },
+    "ScanSection": {
+      "description": "Scanning. (Unknown keys cannot be refused here: serde does not allow\nthat with a flattened section.)",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Scan from start.",
+          "type": "boolean",
+          "default": true
+        },
+        "active": {
+          "description": "Send scan requests to get scan responses.",
+          "type": "boolean",
+          "default": false
+        },
+        "interval_ms": {
+          "description": "Scan interval, ms (2.5 to 10240).",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "default": 100
+        },
+        "window_ms": {
+          "description": "Scan window, ms (no more than the interval).",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "default": 100
+        },
+        "coded": {
+          "description": "Scan on the coded PHY too (long range), when the controller can.",
+          "type": "boolean",
+          "default": true
+        },
+        "filter_accept_list": {
+          "description": "Only devices on the filter accept list.",
+          "type": "boolean",
+          "default": false
+        },
+        "dedup": {
+          "description": "Duplicate filtering.",
+          "$ref": "#/$defs/Dedup",
+          "default": {
+            "interval_ms": 10000
+          }
+        },
+        "allow": {
+          "description": "Publish only devices whose address starts with one of these\n(`BC:57:29`, say); empty publishes everything.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "min_rssi": {
+          "description": "Ignore weaker signals, dBm.",
+          "type": "integer",
+          "format": "int8",
+          "minimum": -128,
+          "maximum": 127,
+          "default": -127
+        },
+        "publish_reports": {
+          "description": "Publish every report on `<base>/scan/<address>`.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "Dedup": {
+      "description": "How to treat repeats of the same advertisement.",
+      "oneOf": [
+        {
+          "description": "Report every advertisement received.",
+          "type": "string",
+          "const": "off"
+        },
+        {
+          "description": "Report a device again only when its data changes.",
+          "type": "string",
+          "const": "changes"
+        },
+        {
+          "description": "Report when its data changes, and at least every this many\nmilliseconds while it is heard (so presence and RSSI stay current).",
+          "type": "object",
+          "properties": {
+            "interval_ms": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "interval_ms"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HomeAssistantConfig": {
+      "description": "Home Assistant discovery.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Publish discovery for devices with decoded readings.",
+          "type": "boolean",
+          "default": true
+        },
+        "discovery_prefix": {
+          "description": "The discovery prefix.",
+          "type": "string",
+          "default": "homeassistant"
+        },
+        "status_topic": {
+          "description": "Home Assistant's birth topic; discovery is sent again when it comes online.",
+          "type": "string",
+          "default": "homeassistant/status"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DataConfig": {
+      "description": "Storage.",
+      "type": "object",
+      "properties": {
+        "dir": {
+          "description": "The data directory.",
+          "type": "string",
+          "default": "/var/lib/bluetooth-bridge"
+        }
+      },
+      "additionalProperties": false
+    },
+    "KeyEntry": {
+      "description": "A device's key.",
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "The device's address.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The 16-byte key, hex.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "key"
+      ]
+    },
+    "PasswordEntry": {
+      "description": "A device's password.",
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "The device's address.",
+          "type": "string"
+        },
+        "password": {
+          "description": "The password.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "password"
+      ]
+    },
+    "IrkEntry": {
+      "description": "A known IRK.",
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "The identity address the device's private addresses stand for.",
+          "type": "string"
+        },
+        "irk": {
+          "description": "The IRK, hex, most significant byte first.",
+          "type": "string"
+        },
+        "label": {
+          "description": "A label.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "irk"
+      ]
+    },
+    "ServiceDef": {
+      "description": "A service to add.",
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "description": "Its UUID.",
+          "type": "string"
+        },
+        "primary": {
+          "description": "Primary (the default) or secondary.",
+          "type": "boolean",
+          "default": true
+        },
+        "characteristics": {
+          "description": "Its characteristics.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CharacteristicDef"
+          }
+        }
+      },
+      "required": [
+        "uuid",
+        "characteristics"
+      ]
+    },
+    "CharacteristicDef": {
+      "description": "A characteristic to add.",
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "description": "Its UUID.",
+          "type": "string"
+        },
+        "properties": {
+          "description": "Its properties, by name: `read`, `write`, `write_without_response`,\n`notify`, `indicate`, `broadcast`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "read": {
+          "description": "Read access.",
+          "$ref": "#/$defs/Access",
+          "default": "open"
+        },
+        "write": {
+          "description": "Write access.",
+          "$ref": "#/$defs/Access",
+          "default": "open"
+        },
+        "value": {
+          "description": "The initial value.",
+          "type": "string",
+          "default": ""
+        },
+        "max_len": {
+          "description": "The longest value a client may write (at most 512).",
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0,
+          "default": 512
+        },
+        "description": {
+          "description": "A Characteristic User Description.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "descriptors": {
+          "description": "Other descriptors.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DescriptorDef"
+          }
+        }
+      },
+      "required": [
+        "uuid",
+        "properties"
+      ]
+    },
+    "Access": {
+      "description": "Who may read or write an attribute.",
+      "oneOf": [
+        {
+          "description": "Nobody.",
+          "type": "string",
+          "const": "never"
+        },
+        {
+          "description": "Anyone connected.",
+          "type": "string",
+          "const": "open"
+        },
+        {
+          "description": "An encrypted link.",
+          "type": "string",
+          "const": "encrypted"
+        },
+        {
+          "description": "An encrypted link with an authenticated (MITM-protected) key.",
+          "type": "string",
+          "const": "authenticated"
+        },
+        {
+          "description": "Authenticated LE Secure Connections with a 128-bit key.",
+          "type": "string",
+          "const": "secure_connections"
+        }
+      ]
+    },
+    "DescriptorDef": {
+      "description": "A descriptor to add.",
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "description": "Its UUID.",
+          "type": "string"
+        },
+        "read": {
+          "description": "Read access.",
+          "$ref": "#/$defs/Access",
+          "default": "open"
+        },
+        "write": {
+          "description": "Write access.",
+          "$ref": "#/$defs/Access",
+          "default": "never"
+        },
+        "value": {
+          "description": "The value.",
+          "type": "string",
+          "default": ""
+        }
+      },
+      "required": [
+        "uuid"
+      ]
+    },
+    "AdvertisingEntry": {
+      "description": "An advertising set.",
+      "type": "object",
+      "properties": {
+        "params": {
+          "description": "How.",
+          "$ref": "#/$defs/AdvertisingParams",
+          "default": {
+            "connectable": false,
+            "scannable": false,
+            "legacy": null,
+            "directed": null,
+            "high_duty": false,
+            "anonymous": false,
+            "include_tx_power": false,
+            "interval_min_ms": 100,
+            "interval_max_ms": 150,
+            "primary_phy": "le1m",
+            "secondary_phy": "le1m",
+            "tx_power": null,
+            "sid": 0,
+            "duration_ms": null,
+            "max_events": null,
+            "filter_accept_list": false,
+            "scan_request_notifications": false
+          }
+        },
+        "data": {
+          "description": "Advertising data, hex (AD structures).",
+          "type": "string",
+          "default": ""
+        },
+        "scan_response": {
+          "description": "Scan response, hex.",
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "AdvertisingParams": {
+      "description": "How a set advertises.",
+      "type": "object",
+      "properties": {
+        "connectable": {
+          "description": "Accept connections.",
+          "type": "boolean",
+          "default": false
+        },
+        "scannable": {
+          "description": "Answer scan requests with the scan response.",
+          "type": "boolean",
+          "default": false
+        },
+        "legacy": {
+          "description": "Use legacy PDUs (seen by every scanner, 31 octets of data). `None`\nchooses: legacy when the data fits and nothing needs Bluetooth 5.",
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null
+        },
+        "directed": {
+          "description": "Advertise directed at one device.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "high_duty": {
+          "description": "High duty cycle directed advertising (lasts 1.28 s at most).",
+          "type": "boolean",
+          "default": false
+        },
+        "anonymous": {
+          "description": "Omit our address (extended, non-connectable only).",
+          "type": "boolean",
+          "default": false
+        },
+        "include_tx_power": {
+          "description": "Put the TX power in the extended header.",
+          "type": "boolean",
+          "default": false
+        },
+        "interval_min_ms": {
+          "description": "Minimum interval, ms (20 or more).",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "default": 100
+        },
+        "interval_max_ms": {
+          "description": "Maximum interval, ms.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "default": 150
+        },
+        "primary_phy": {
+          "description": "Primary PHY: `le1m`, or `le_coded` for long range.",
+          "$ref": "#/$defs/Phy",
+          "default": "le1m"
+        },
+        "secondary_phy": {
+          "description": "Secondary PHY (extended).",
+          "$ref": "#/$defs/Phy",
+          "default": "le1m"
+        },
+        "tx_power": {
+          "description": "TX power to ask for, dBm; `None` lets the controller choose.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int8",
+          "minimum": -128,
+          "maximum": 127,
+          "default": null
+        },
+        "sid": {
+          "description": "Advertising set id (0 to 15), as scanners see it.",
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0,
+          "maximum": 255,
+          "default": 0
+        },
+        "duration_ms": {
+          "description": "Stop after this long, ms.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0,
+          "default": null
+        },
+        "max_events": {
+          "description": "Stop after this many events (extended).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "minimum": 0,
+          "maximum": 255,
+          "default": null
+        },
+        "filter_accept_list": {
+          "description": "Only answer scan and connection requests from the filter accept list.",
+          "type": "boolean",
+          "default": false
+        },
+        "scan_request_notifications": {
+          "description": "Report scan requests as [`crate::HostEvent::ScanRequest`].",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "Phy": {
+      "description": "A PHY.",
+      "oneOf": [
+        {
+          "description": "LE 1M.",
+          "type": "string",
+          "const": "le1m"
+        },
+        {
+          "description": "LE 2M.",
+          "type": "string",
+          "const": "le2m"
+        },
+        {
+          "description": "LE Coded (long range).",
+          "type": "string",
+          "const": "le_coded"
+        }
+      ]
+    }
+  }
+}

@@ -8,6 +8,7 @@ use serde::Deserialize;
 
 /// The whole file.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct Config {
     /// The controller.
@@ -43,6 +44,7 @@ pub struct Config {
 
 /// The controller.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct AdapterConfig {
     /// `hci0`, `serial:/dev/ttyAMA0:115200`, or `tcp:host:port`.
@@ -87,6 +89,7 @@ fn yes() -> bool {
 
 /// The broker.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct MqttConfig {
     /// Host name.
@@ -122,6 +125,7 @@ impl Default for MqttConfig {
 /// Scanning. (Unknown keys cannot be refused here: serde does not allow
 /// that with a flattened section.)
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(default)]
 pub struct ScanSection {
     /// Scan from start.
@@ -152,6 +156,7 @@ impl Default for ScanSection {
 
 /// Home Assistant discovery.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct HomeAssistantConfig {
     /// Publish discovery for devices with decoded readings.
@@ -174,6 +179,7 @@ impl Default for HomeAssistantConfig {
 
 /// Storage.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct DataConfig {
     /// The data directory.
@@ -190,6 +196,7 @@ impl Default for DataConfig {
 
 /// A device's key.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct KeyEntry {
     /// The device's address.
@@ -200,6 +207,7 @@ pub struct KeyEntry {
 
 /// A device's password.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct PasswordEntry {
     /// The device's address.
@@ -210,6 +218,7 @@ pub struct PasswordEntry {
 
 /// A known IRK.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct IrkEntry {
     /// The identity address the device's private addresses stand for.
@@ -223,6 +232,7 @@ pub struct IrkEntry {
 
 /// An advertising set.
 #[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct AdvertisingEntry {
     /// How.

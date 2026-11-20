@@ -18,6 +18,7 @@ use crate::host::{Host, HostEvent};
 
 /// Who may read or write an attribute.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Access {
     /// Nobody.
@@ -54,8 +55,10 @@ impl Access {
 
 /// A descriptor to add.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct DescriptorDef {
     /// Its UUID.
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub uuid: Uuid,
     /// Read access.
     #[serde(default)]
@@ -65,6 +68,7 @@ pub struct DescriptorDef {
     pub write: Access,
     /// The value.
     #[serde(default, with = "hex_bytes")]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub value: Vec<u8>,
 }
 
@@ -74,8 +78,10 @@ fn never() -> Access {
 
 /// A characteristic to add.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CharacteristicDef {
     /// Its UUID.
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub uuid: Uuid,
     /// Its properties, by name: `read`, `write`, `write_without_response`,
     /// `notify`, `indicate`, `broadcast`.
@@ -88,6 +94,7 @@ pub struct CharacteristicDef {
     pub write: Access,
     /// The initial value.
     #[serde(default, with = "hex_bytes")]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub value: Vec<u8>,
     /// The longest value a client may write (at most 512).
     #[serde(default = "max_len")]
@@ -106,8 +113,10 @@ fn max_len() -> usize {
 
 /// A service to add.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ServiceDef {
     /// Its UUID.
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub uuid: Uuid,
     /// Primary (the default) or secondary.
     #[serde(default = "yes")]

@@ -26,6 +26,7 @@ use crate::host::Host;
 
 /// How a set advertises.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default)]
 pub struct AdvertisingParams {
     /// Accept connections.
@@ -36,6 +37,7 @@ pub struct AdvertisingParams {
     /// chooses: legacy when the data fits and nothing needs Bluetooth 5.
     pub legacy: Option<bool>,
     /// Advertise directed at one device.
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub directed: Option<Address>,
     /// High duty cycle directed advertising (lasts 1.28 s at most).
     pub high_duty: bool,
