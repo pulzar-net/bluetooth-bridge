@@ -419,7 +419,13 @@ async def rpa(device, args, inbox):
     await inbox.get("stop")
 
 
+async def idle(device, args, inbox):
+    """Nothing scripted: the controllers are for hosts under test (two, with port2)."""
+    await inbox.get("stop")
+
+
 SCENARIOS = {
+    "idle": idle,
     "scan_legacy": scan_legacy,
     "scan_extended": scan_extended,
     "periodic": periodic,
@@ -442,6 +448,17 @@ async def main():
         link=link,
         public_address=DUT_PUBLIC,
     )
+    second = None
+    if args.get("port2"):
+        # A second host under test on the same simulated link.
+        second = await open_transport(f"tcp-server:127.0.0.1:{args['port2']}")
+        Controller(
+            "DUT2",
+            host_source=second.source,
+            host_sink=second.sink,
+            link=link,
+            public_address="D0:11:22:33:44:66",
+        )
     peer_controller = Controller("PEER", link=link, public_address="E0:22:33:44:55:66")
     device = Device(
         address=Address(PEER_ADDRESS),
@@ -461,6 +478,8 @@ async def main():
         raise
     emit("done")
     await transport.close()
+    if second:
+        await second.close()
 
 
 if __name__ == "__main__":

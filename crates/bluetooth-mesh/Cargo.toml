@@ -26,8 +26,9 @@ cmac.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+serde_json.workspace = true
 tempfile = "3"
-tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "rt-multi-thread", "process", "io-util"] }
 
 [lints]
 workspace = true
