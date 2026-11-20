@@ -1,0 +1,23 @@
+[package]
+name = "bluetooth-mesh"
+description = "Bluetooth Mesh on the bluetooth-host stack: the security toolbox, network and transport layers, provisioning, proxy, and the foundation and generic models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["bluetooth", "mesh", "ble"]
+categories = ["network-programming", "hardware-support"]
+
+[dependencies]
+aes.workspace = true
+ccm.workspace = true
+cmac.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex.workspace = true
+
+[lints]
+workspace = true

@@ -294,6 +294,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bluetooth-mesh"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "ccm",
+ "cmac",
+ "hex",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "bluetooth-numbers"
 version = "0.1.0"
 dependencies = [

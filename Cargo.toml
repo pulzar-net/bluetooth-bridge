@@ -4,6 +4,7 @@ members = [
     "crates/bluetooth-numbers",
     "crates/bluetooth-adv",
     "crates/bluetooth-host",
+    "crates/bluetooth-mesh",
     "crates/bluetooth-bridge",
 ]
 exclude = ["fuzz"]
