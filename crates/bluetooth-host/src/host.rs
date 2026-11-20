@@ -526,7 +526,9 @@ async fn read_loop(weak: std::sync::Weak<Inner>, mut reader: PacketReader) {
 
 /// Rejects malformed HCI events before they are handed to the parser: each
 /// LE Extended Advertising Report must hold its 24 fixed octets and the data
-/// its length names.
+/// its length names. bt-hci 0.11 panics on a report that ends after
+/// Primary_PHY (https://github.com/embassy-rs/bt-hci/issues/110); delete this
+/// once a release with the fix is the one we use.
 pub(crate) fn well_formed(bytes: &[u8]) -> bool {
     if bytes.first() != Some(&0x3e) || bytes.get(2) != Some(&0x0d) {
         return true;
