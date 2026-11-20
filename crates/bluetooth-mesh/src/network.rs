@@ -58,9 +58,21 @@ pub struct NetworkPdu {
 /// The most a Network PDU carries on the advertising bearer.
 pub const MAX_PDU: usize = 29;
 
-fn nonce(pdu: &NetworkPdu, iv_index: u32) -> [u8; 13] {
+/// Which nonce a Network PDU is encrypted with.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Nonce {
+    /// Every PDU on the mesh.
+    Network,
+    /// Proxy Configuration messages, between a proxy client and server only.
+    Proxy,
+}
+
+fn nonce(kind: Nonce, pdu: &NetworkPdu, iv_index: u32) -> [u8; 13] {
     let mut n = [0u8; 13];
-    n[1] = (u8::from(pdu.ctl) << 7) | (pdu.ttl & 0x7f);
+    match kind {
+        Nonce::Network => n[1] = (u8::from(pdu.ctl) << 7) | (pdu.ttl & 0x7f),
+        Nonce::Proxy => n[0] = 0x03,
+    }
     n[2..5].copy_from_slice(&pdu.seq.to_be_bytes()[1..]);
     n[5..7].copy_from_slice(&pdu.src.to_be_bytes());
     n[9..13].copy_from_slice(&iv_index.to_be_bytes());
@@ -87,6 +99,21 @@ pub enum Error {
 
 /// Encrypts and obfuscates a Network PDU.
 pub fn encode(net: &NetworkKey, iv_index: u32, pdu: &NetworkPdu) -> Result<Vec<u8>, Error> {
+    encode_with(Nonce::Network, net, iv_index, pdu)
+}
+
+/// Encrypts and obfuscates a Proxy Configuration message (with the proxy
+/// nonce; `pdu` is a control message, TTL 0, to the unassigned address).
+pub fn encode_proxy(net: &NetworkKey, iv_index: u32, pdu: &NetworkPdu) -> Result<Vec<u8>, Error> {
+    encode_with(Nonce::Proxy, net, iv_index, pdu)
+}
+
+fn encode_with(
+    kind: Nonce,
+    net: &NetworkKey,
+    iv_index: u32,
+    pdu: &NetworkPdu,
+) -> Result<Vec<u8>, Error> {
     let mic = if pdu.ctl { 8 } else { 4 };
     if 9 + pdu.transport.len() + mic > MAX_PDU {
         return Err(Error::TooLong(pdu.transport.len()));
@@ -98,7 +125,7 @@ pub fn encode(net: &NetworkKey, iv_index: u32, pdu: &NetworkPdu) -> Result<Vec<u
     plain.extend_from_slice(&pdu.transport);
     let enc = crypto::ccm_encrypt(
         &net.material.encryption_key,
-        &nonce(pdu, iv_index),
+        &nonce(kind, pdu, iv_index),
         &[],
         &plain,
         mic,
@@ -120,6 +147,24 @@ pub fn encode(net: &NetworkKey, iv_index: u32, pdu: &NetworkPdu) -> Result<Vec<u
 /// (during an IV update). Returns the key's position, the IV index used and
 /// the PDU.
 pub fn decode(keys: &[NetworkKey], iv_index: u32, data: &[u8]) -> Option<(usize, u32, NetworkPdu)> {
+    decode_with(Nonce::Network, keys, iv_index, data)
+}
+
+/// Decodes a Proxy Configuration message, as [`decode`] does a Network PDU.
+pub fn decode_proxy(
+    keys: &[NetworkKey],
+    iv_index: u32,
+    data: &[u8],
+) -> Option<(usize, u32, NetworkPdu)> {
+    decode_with(Nonce::Proxy, keys, iv_index, data)
+}
+
+fn decode_with(
+    kind: Nonce,
+    keys: &[NetworkKey],
+    iv_index: u32,
+    data: &[u8],
+) -> Option<(usize, u32, NetworkPdu)> {
     if data.len() < 14 || data.len() > MAX_PDU {
         return None;
     }
@@ -155,7 +200,7 @@ pub fn decode(keys: &[NetworkKey], iv_index: u32, data: &[u8]) -> Option<(usize,
         };
         if let Some(plain) = crypto::ccm_decrypt(
             &net.material.encryption_key,
-            &nonce(&pdu, iv),
+            &nonce(kind, &pdu, iv),
             &[],
             &data[7..],
             mic,
@@ -215,6 +260,36 @@ mod tests {
 
     fn h(s: &str) -> Vec<u8> {
         hex::decode(s.replace(' ', "")).unwrap()
+    }
+
+    #[test]
+    fn proxy_nonce_is_its_own() {
+        let net = NetworkKey::new(0, h("7dd7364cd842ad18c17c2b820c84c3d6").try_into().unwrap());
+        let pdu = NetworkPdu {
+            ctl: true,
+            ttl: 0,
+            seq: 1,
+            src: 0x0001,
+            dst: 0x0000,
+            transport: vec![0x00, 0x01],
+        };
+        assert_eq!(
+            nonce(Nonce::Proxy, &pdu, 0x1234_5678).to_vec(),
+            h("03 00 000001 0001 0000 12345678")
+        );
+        let wire = encode_proxy(&net, 0x1234_5678, &pdu).unwrap();
+        let keys = [net];
+        let (_, _, back) = decode_proxy(&keys, 0x1234_5678, &wire).unwrap();
+        assert_eq!(back, pdu);
+        assert!(
+            decode(&keys, 0x1234_5678, &wire).is_none(),
+            "not a mesh PDU"
+        );
+        let mesh = encode(&keys[0], 0x1234_5678, &pdu).unwrap();
+        assert!(
+            decode_proxy(&keys, 0x1234_5678, &mesh).is_none(),
+            "not a proxy PDU"
+        );
     }
 
     /// Mesh Protocol, 8.3.1 (Message #1: a control message, relayed by no one).

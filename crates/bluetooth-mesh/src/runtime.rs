@@ -758,6 +758,40 @@ impl Mesh {
         d
     }
 
+    // ------------------------------------------------------------ proxy
+
+    /// A Proxy Configuration message from us, for the proxy we are connected
+    /// to: a control message, TTL 0, to the unassigned address, with the
+    /// proxy nonce and our primary network key. None until provisioned.
+    pub fn proxy_configuration(&self, msg: &crate::proxy::Config) -> Option<Vec<u8>> {
+        let (iv, src) = {
+            let s = lock(&self.inner.store);
+            (s.iv_index, s.address)
+        };
+        let net = self.net_keys().into_iter().next()?;
+        if src == 0 {
+            return None;
+        }
+        let pdu = NetworkPdu {
+            ctl: true,
+            ttl: 0,
+            seq: self.next_seq(),
+            src,
+            dst: 0,
+            transport: msg.bytes(),
+        };
+        network::encode_proxy(&net, iv, &pdu).ok()
+    }
+
+    /// A Proxy Configuration message from the proxy, opened.
+    pub fn open_proxy_configuration(&self, data: &[u8]) -> Option<crate::proxy::Config> {
+        let iv = lock(&self.inner.store).iv_index;
+        let (_, _, pdu) = network::decode_proxy(&self.net_keys(), iv, data)?;
+        (pdu.ctl && pdu.dst == 0)
+            .then(|| crate::proxy::Config::parse(&pdu.transport))
+            .flatten()
+    }
+
     // ------------------------------------------------------------ receiving
 
     /// Takes one Mesh AD structure heard on the air.
