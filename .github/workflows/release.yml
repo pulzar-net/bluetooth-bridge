@@ -9,7 +9,7 @@
 #
 # The tag must equal the workspace version. Every target's tests run under
 # qemu before anything is published; the release carries the binaries and
-# SHA256SUMS. The crates are used by tag as git dependencies.
+# SHA256SUMS. Then the crates go to crates.io, in dependency order.
 
 name: release
 on:
@@ -101,3 +101,42 @@ jobs:
           notes="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
           gh release create "${TAG}" dist/* --title "${TAG}" --notes "${notes}" --verify-tag
 
+  # The crates, after the binaries are out: each in dependency order, a
+  # version crates.io already has skipped, so a release run again after a
+  # failure part way finishes the rest. Authenticated with the
+  # CARGO_REGISTRY_TOKEN secret, or by trusted publishing (OIDC) once the
+  # crates are set up for it on crates.io and the TRUSTED_PUBLISHING variable
+  # is "true".
+  crates:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CRATES: bluetooth-numbers bluetooth-adv bluetooth-host bluetooth-mesh-stack bluetooth-bridge
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Trusted publishing token
+        id: oidc
+        if: vars.TRUSTED_PUBLISHING == 'true'
+        uses: rust-lang/crates-io-auth-action@v1
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.oidc.outputs.token || secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          # Until a token or trusted publishing is set up, a release is the
+          # binaries alone.
+          [ -n "${CARGO_REGISTRY_TOKEN}" ] || { echo "no crates.io token; the crates are not published"; exit 0; }
+          version="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)"
+          for crate in ${CRATES}; do
+            code="$(curl -s -o /dev/null -w '%{http_code}' -A 'bluetooth-bridge release (github.com/pulzar-net/bluetooth-bridge)' \
+              "https://crates.io/api/v1/crates/${crate}/${version}")"
+            if [ "${code}" = 200 ]; then echo "${crate} ${version} is already on crates.io"; continue; fi
+            cargo publish -p "${crate}" --locked
+          done

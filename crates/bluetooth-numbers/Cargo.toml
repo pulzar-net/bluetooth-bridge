@@ -7,11 +7,14 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/bluetooth-numbers"
+readme = "README.md"
 keywords = ["bluetooth", "ble", "assigned-numbers", "uuid"]
 categories = ["no-std", "hardware-support"]
 build = "build.rs"
 # The SIG's repository is a git submodule at `sig/`; only the YAML the build reads is packaged.
-include = ["src/**", "build.rs", "sig/assigned_numbers/**/*.yaml", "README.md"]
+include = ["src/**", "build.rs", "sig/assigned_numbers/**/*.yaml", "README.md", "LICENSE"]
 
 [build-dependencies]
 yaml-rust2.workspace = true

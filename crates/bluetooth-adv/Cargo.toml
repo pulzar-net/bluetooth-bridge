@@ -7,6 +7,11 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/bluetooth-adv"
+readme = "README.md"
+# Tests run from the repository (Bumble, recordings, the example config); the package is the library.
+include = ["src/**", "README.md", "LICENSE"]
 keywords = ["bluetooth", "ble", "beacon", "bthome", "eddystone"]
 categories = ["parser-implementations", "hardware-support"]
 

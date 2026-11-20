@@ -1,6 +1,13 @@
 # bluetooth-numbers
 
+[![crates.io](https://img.shields.io/crates/v/bluetooth-numbers.svg)](https://crates.io/crates/bluetooth-numbers)
+[![docs.rs](https://img.shields.io/docsrs/bluetooth-numbers)](https://docs.rs/bluetooth-numbers)
+
 The Bluetooth SIG's Assigned Numbers, as lookup functions.
+
+```sh
+cargo add bluetooth-numbers
+```
 
 Every table is generated at build time from the YAML the SIG publishes in
 its public repository (<https://bitbucket.org/bluetooth-SIG/public>), so the

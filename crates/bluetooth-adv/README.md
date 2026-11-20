@@ -1,6 +1,13 @@
 # bluetooth-adv
 
+[![crates.io](https://img.shields.io/crates/v/bluetooth-adv.svg)](https://crates.io/crates/bluetooth-adv)
+[![docs.rs](https://img.shields.io/docsrs/bluetooth-adv)](https://docs.rs/bluetooth-adv)
+
 Bluetooth LE advertising data, parsed and decoded.
+
+```sh
+cargo add bluetooth-adv
+```
 
 `Advertisement::parse` reads the AD structures of an advertisement or
 scan response (Core Specification Supplement, Part A) into typed fields,

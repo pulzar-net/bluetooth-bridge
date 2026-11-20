@@ -21,9 +21,9 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bluetooth_host::Host;
-use bluetooth_mesh::access::{Composition, ModelId};
-use bluetooth_mesh::provisioning::Auth;
-use bluetooth_mesh::runtime::{ad, run_host_bearer, HostBearer, Mesh, MeshEvent};
+use bluetooth_mesh_stack::access::{Composition, ModelId};
+use bluetooth_mesh_stack::provisioning::Auth;
+use bluetooth_mesh_stack::runtime::{ad, run_host_bearer, HostBearer, Mesh, MeshEvent};
 use serde_json::{json, Value};
 
 use crate::mqtt::Mqtt;

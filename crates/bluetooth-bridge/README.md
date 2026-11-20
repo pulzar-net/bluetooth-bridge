@@ -1,6 +1,13 @@
 # bluetooth-bridge
 
+[![crates.io](https://img.shields.io/crates/v/bluetooth-bridge.svg)](https://crates.io/crates/bluetooth-bridge)
+[![docs.rs](https://img.shields.io/docsrs/bluetooth-bridge)](https://docs.rs/bluetooth-bridge)
+
 A standalone Bluetooth LE to MQTT bridge on the `bluetooth_host` stack.
+
+```sh
+cargo install bluetooth-bridge
+```
 
 Advertisements go out parsed (every AD type, beacon formats decoded),
 decoded sensor readings get Home Assistant discovery, and every GATT,

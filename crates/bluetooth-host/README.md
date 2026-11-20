@@ -1,6 +1,13 @@
 # bluetooth-host
 
+[![crates.io](https://img.shields.io/crates/v/bluetooth-host.svg)](https://crates.io/crates/bluetooth-host)
+[![docs.rs](https://img.shields.io/docsrs/bluetooth-host)](https://docs.rs/bluetooth-host)
+
 A Bluetooth host stack over raw HCI.
+
+```sh
+cargo add bluetooth-host
+```
 
 It talks to a controller directly, over the Linux HCI user channel, H4 on
 a serial port, or H4 over TCP, so the same features work on every board

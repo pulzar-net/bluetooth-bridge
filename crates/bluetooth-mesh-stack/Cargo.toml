@@ -1,5 +1,5 @@
 [package]
-name = "bluetooth-mesh"
+name = "bluetooth-mesh-stack"
 description = "Bluetooth Mesh on the bluetooth-host stack: the security toolbox, network and transport layers, provisioning, proxy, and the foundation and generic models"
 version.workspace = true
 edition.workspace = true
@@ -7,6 +7,11 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
+homepage.workspace = true
+documentation = "https://docs.rs/bluetooth-mesh-stack"
+readme = "README.md"
+# Tests run from the repository (Bumble, recordings, the example config); the package is the library.
+include = ["src/**", "README.md", "LICENSE"]
 keywords = ["bluetooth", "mesh", "ble"]
 categories = ["network-programming", "hardware-support"]
 

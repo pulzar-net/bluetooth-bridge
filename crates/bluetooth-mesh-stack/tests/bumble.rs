@@ -9,9 +9,9 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bluetooth_host::{Dedup, Host, HostConfig, ScanConfig, TransportSpec};
-use bluetooth_mesh::provisioning::{Auth, Capabilities};
-use bluetooth_mesh::proxy::{ProxyBearer, ProxyServer};
-use bluetooth_mesh::runtime::{
+use bluetooth_mesh_stack::provisioning::{Auth, Capabilities};
+use bluetooth_mesh_stack::proxy::{ProxyBearer, ProxyServer};
+use bluetooth_mesh_stack::runtime::{
     run_host_bearer, Bearer, HexKey, HostBearer, Mesh, MeshEvent, NodeRecord, Store,
 };
 use serde_json::{json, Value};
