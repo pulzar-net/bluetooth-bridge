@@ -1,0 +1,91 @@
+# Static musl binaries of the bridge, on a tag.
+#
+#   aarch64-unknown-linux-musl   Raspberry Pi 3, 4 and 5 class boards
+#   mipsel-unknown-linux-musl    MT7621/MT7628 class routers
+#   mips-unknown-linux-musl      big-endian MIPS routers
+#   x86_64-unknown-linux-musl    PCs and servers
+#
+# The tag must equal the workspace version. Every target's tests run under
+# qemu before anything is published; the release carries the binaries and
+# SHA256SUMS. The crates are used by tag as git dependencies.
+
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+env:
+  NIGHTLY: nightly-2026-11-14
+  ZIG: 0.16.0
+  ZIGBUILD: 0.24.1
+  MAX_BINARY_SIZE: 3145728
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: The tag is the crate version
+        run: |
+          want="$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)"
+          [ "${GITHUB_REF_NAME#v}" = "${want}" ] || { echo "tag ${GITHUB_REF_NAME} is not v${want}" >&2; exit 1; }
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.NIGHTLY }}
+          components: rust-src
+          targets: aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-zigbuild@${{ env.ZIGBUILD }}
+      - name: qemu-user
+        run: sudo apt-get update -q && sudo apt-get install -y -q qemu-user
+
+      - name: Test and build
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUNNER: qemu-aarch64
+          CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_MUSL_RUNNER: qemu-mipsel
+          CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static -C link-self-contained=no
+          CARGO_TARGET_MIPS_UNKNOWN_LINUX_MUSL_RUNNER: qemu-mips
+          CARGO_TARGET_MIPS_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static -C link-self-contained=no
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUNNER: env
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for target in x86_64-unknown-linux-musl aarch64-unknown-linux-musl mipsel-unknown-linux-musl mips-unknown-linux-musl; do
+            echo "::group::${target}"
+            std=()
+            case "${target}" in mips*) std=(-Zbuild-std) ;; esac
+            cargo-zigbuild test --workspace --target "${target}" "${std[@]}"
+            case "${target}" in mips*) std=(-Zbuild-std=std,panic_abort) ;; esac
+            cargo zigbuild --release --bin bluetooth-bridge --target "${target}" "${std[@]}"
+            bin="target/${target}/release/bluetooth-bridge"
+            file "${bin}" | grep -q 'statically linked' || { file "${bin}"; echo "${target}: not static" >&2; exit 1; }
+            size="$(stat -c %s "${bin}")"
+            echo "${target}: ${size} bytes"
+            [ "${size}" -le "${MAX_BINARY_SIZE}" ] || { echo "over the ${MAX_BINARY_SIZE} byte budget" >&2; exit 1; }
+            runner="CARGO_TARGET_$(echo "${target}" | tr 'a-z-' 'A-Z_')_RUNNER"
+            "${!runner}" "${bin}" --version
+            cp "${bin}" "dist/bluetooth-bridge-${target%%-*}-linux-musl"
+            echo "::endgroup::"
+          done
+          (cd dist && sha256sum bluetooth-bridge-* > SHA256SUMS && cat SHA256SUMS)
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
+          gh release create "${GITHUB_REF_NAME}" dist/* --title "${GITHUB_REF_NAME}" --notes "${notes}"
