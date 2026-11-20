@@ -1,11 +1,14 @@
 # Changelog
 
-All notable changes are listed here. The project follows semantic
-versioning.
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the crates
+follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 Second milestone, in progress: Bluetooth Mesh.
+
+### Added
 
 - `bluetooth-numbers`: Mesh model opcodes and model identifiers.
 - `bluetooth-mesh`, new:
@@ -24,9 +27,11 @@ Second milestone, in progress: Bluetooth Mesh.
   - End to end in CI on two Bumble controllers: provisioning, configuration
     and control over advertising, and control through a proxy.
 
-## 0.1.0 (19 November 2026)
+## [0.1.0] - 2026-11-19
 
 First milestone: Bluetooth LE.
+
+### Added
 
 - `bluetooth-numbers`: the SIG's assigned numbers (company identifiers;
   service, characteristic, descriptor, unit, member and SDO UUIDs; AD types;
@@ -44,3 +49,6 @@ First milestone: Bluetooth LE.
   re-encryption; `probe`.
 - `bluetooth-bridge`: MQTT bridge with Home Assistant discovery and requests
   for scanning, connections, GATT, pairing, advertising and the GATT server.
+
+[Unreleased]: https://github.com/pulzar-net/bluetooth-bridge/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/pulzar-net/bluetooth-bridge/releases/tag/v0.1.0

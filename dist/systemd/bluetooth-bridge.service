@@ -1,0 +1,59 @@
+# bluetooth-bridge as a systemd service.
+#
+#   sudo systemctl disable --now bluetooth      # BlueZ must not use the controller
+#   sudo install -m 0644 bluetooth-bridge.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now bluetooth-bridge
+#
+# The bridge runs as an unprivileged dynamic user with one capability,
+# CAP_NET_ADMIN, which the HCI user channel needs, and in the dialout group
+# for serial controllers. Its data directory is /var/lib/bluetooth-bridge
+# (StateDirectory), its configuration /etc/bluetooth-bridge/config.toml.
+
+[Unit]
+Description=Bluetooth LE to MQTT bridge
+Documentation=https://pulzar-net.github.io/bluetooth-bridge/
+After=network-online.target
+Wants=network-online.target
+Conflicts=bluetooth.service
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/bluetooth-bridge --config /etc/bluetooth-bridge/config.toml
+Restart=on-failure
+RestartSec=5
+Environment=RUST_LOG=info
+
+DynamicUser=yes
+SupplementaryGroups=dialout
+StateDirectory=bluetooth-bridge
+StateDirectoryMode=0700
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN
+# The MQTT password, if the broker needs one: keep the file readable by root
+# only and point mqtt.password_file at
+# /run/credentials/bluetooth-bridge.service/mqtt-password.
+#LoadCredential=mqtt-password:/etc/bluetooth-bridge/mqtt-password
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_BLUETOOTH
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

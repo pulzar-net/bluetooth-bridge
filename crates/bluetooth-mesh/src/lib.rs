@@ -1,4 +1,4 @@
-//! Bluetooth Mesh on the bluetooth-host stack (work in progress).
+#![doc = include_str!("../README.md")]
 
 pub mod access;
 pub mod bearer;

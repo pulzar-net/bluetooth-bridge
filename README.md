@@ -1,143 +1,334 @@
 # bluetooth-bridge
 
-A Bluetooth host stack and MQTT bridge in Rust, maintained by
-[Pulzar](https://pulzr.net). MIT licensed.
+[![CI](https://github.com/pulzar-net/bluetooth-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/pulzar-net/bluetooth-bridge/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/pulzar-net/bluetooth-bridge)](https://github.com/pulzar-net/bluetooth-bridge/releases/latest)
+[![Docs](https://img.shields.io/badge/docs-pulzar--net.github.io-blue)](https://pulzar-net.github.io/bluetooth-bridge/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![MSRV](https://img.shields.io/badge/MSRV-1.89-blue)](Cargo.toml)
 
-It drives a Bluetooth controller directly over HCI: the Linux HCI user
-channel, H4 on a serial port, or H4 over TCP. There is no BlueZ and no D-Bus,
-so the same features work on every board, from a Raspberry Pi's on-board chip
-to a USB dongle on an OpenWrt router. It is a set of library crates you can
-embed, and a standalone bridge that speaks MQTT with Home Assistant discovery
-and a plain JSON topic scheme.
+A Bluetooth host stack over raw HCI and a Bluetooth LE to MQTT bridge,
+written in Rust. It drives a Bluetooth controller directly, with no BlueZ
+and no D-Bus: the Linux HCI user channel, H4 on a serial port, or H4 over
+TCP. The bridge scans, decodes beacons and sensors (BTHome, Ruuvi,
+iBeacon, Eddystone and more), publishes them to MQTT with Home Assistant
+discovery, and exposes connections, GATT, pairing and advertising as MQTT
+requests. It is one static binary of under 3 MB that scans a busy site in
+under 8 MB of memory, so it fits on routers and small gateways as well as
+on a Raspberry Pi or a server. The same stack is a set of library crates
+for anyone building Bluetooth software in Rust.
 
-**Status: 0.1.0, first milestone (Bluetooth LE), not yet tested on
-hardware.** Every role, pairing method and GATT operation runs end to end in
-CI against [Bumble](https://github.com/google/bumble)'s virtual controller;
-bench testing on real controllers is next.
+It exists because a Bluetooth host on Linux usually means BlueZ, whose
+features and behavior depend on the kernel and BlueZ version of each board,
+and there was no complete Bluetooth LE host in Rust that runs on HCI
+directly, the same way on every board.
 
-## What it does
+**[Documentation](https://pulzar-net.github.io/bluetooth-bridge/)** |
+**[Quick start](#quick-start)** |
+**[Hardware](#supported-hardware)** |
+**[MQTT API](https://pulzar-net.github.io/bluetooth-bridge/mqtt.html)** |
+**[Library](#use-it-as-a-library)** |
+**[Changelog](CHANGELOG.md)**
 
-| Area | Supported |
+## Status
+
+bluetooth-bridge is **0.x and young**. Version 0.1.0 is Bluetooth LE. Every
+role, pairing method and GATT operation is tested in CI against
+[Bumble](https://github.com/google/bumble)'s virtual controller, but **it
+has not yet been tested on real hardware**. Expect rough edges and breaking
+changes between 0.x releases.
+
+| Feature | State |
 |---|---|
-| Transports | HCI user channel (Linux, after the kernel driver loads the chip's firmware), H4 over UART, H4 over TCP |
-| Controller discovery | version, manufacturer, supported commands, LMP and LE features, LE states, buffers, advertising sets, list sizes, data length; every feature checks before it asks |
-| Observer | passive and active scanning, legacy and extended reports, coded PHY, fragmented report reassembly, periodic advertising sync, filter accept list, duplicate filtering done by the host (off, on change, or on change plus a heartbeat) |
-| Advertising data | every AD type in the SIG's assigned numbers named and parsed into typed fields; company, UUID, appearance and URI scheme names from the SIG's own published data |
-| Beacons and sensors | iBeacon, AltBeacon, Eddystone (UID, URL, TLM, encrypted TLM, EID), BTHome v2 including decryption, KKM KBeacon (sensor v1 and v2, encrypted frames, system), Ruuvi (through the `ruuvi-sensor-protocol` crate) |
-| Broadcaster | legacy advertising, extended advertising sets (up to the controller's count, 1650 octets), periodic advertising trains |
-| Connections | central and peripheral; parameter updates (controller procedure as central, L2CAP request as peripheral); PHY update; data length extension; RSSI; remote features |
-| L2CAP | LE signaling; LE Credit Based and enhanced Credit Based channels with real inbound flow control |
-| ATT and GATT | client: MTU exchange, discovery (services, included services, characteristics, descriptors), read, long read, read by type, read multiple (fixed and variable), write, write without response, long and reliable writes, notifications and indications; server: a database built at run time with per-attribute security, client configuration kept for bonded peers, long writes, Service Changed and Database Hash |
-| SMP | LE legacy pairing and LE Secure Connections; Just Works, Numeric Comparison, Passkey Entry (either side typing, or both), Out of Band; every IO capability; key distribution; bonding with a persistent key store (mode 0600, atomic writes); re-encryption with stored keys; debug-key and reflected-key rejection |
-| Privacy | resolvable private addresses resolved to identities from stored IRKs (bonded, or entered by hand for tags), so a device with a rotating address stays one device |
+| Transports: Linux HCI user channel, H4 over UART, H4 over TCP | done in 0.1.0 |
+| Scanning: passive and active, legacy and extended, coded PHY, periodic advertising sync, duplicate filtering by the host | done in 0.1.0 |
+| Advertising data: every AD type, names from the Bluetooth SIG's assigned numbers | done in 0.1.0 |
+| Beacons and sensors: iBeacon, AltBeacon, Eddystone, BTHome v2 (with decryption), Ruuvi, KKM | done in 0.1.0 |
+| Advertising: legacy, extended sets, periodic trains | done in 0.1.0 |
+| Connections as central and peripheral; parameter, PHY and data length updates | done in 0.1.0 |
+| L2CAP credit-based channels; GATT client and server | done in 0.1.0 |
+| Pairing: legacy and Secure Connections, every method and IO capability, bonding | done in 0.1.0 |
+| Privacy: private addresses resolved to identities | done in 0.1.0 |
+| Home Assistant MQTT discovery for decoded sensors | done in 0.1.0 |
+| Bluetooth Mesh (`bluetooth-mesh` crate) | in progress on `main`, library only |
+| Testing on real controllers | in progress |
+| Classic BR/EDR (inquiry, SDP, RFCOMM) | planned |
+| Direction finding (AoA, AoD) and channel sounding | planned |
+| LE Audio | not planned |
 
-Later milestones are designed in [docs/roadmap.md](docs/roadmap.md):
-Bluetooth Mesh, Classic BR/EDR (inquiry, SDP, RFCOMM), direction finding and
-channel sounding.
+## Supported hardware
 
-## Crates
+A Bluetooth controller is a chip with HCI firmware: built into a board or
+on a USB dongle or UART. **Expected** means the controller speaks standard
+HCI and the stack checks every feature before using it, but nobody has
+reported it working yet. If you try one, please
+[tell us how it went](https://github.com/pulzar-net/bluetooth-bridge/issues/new?template=device.yml).
 
-| Crate | What it does |
-|---|---|
-| `bluetooth-numbers` | the Bluetooth SIG's Assigned Numbers as lookup functions, generated at build time from the SIG's public repository (a git submodule), never typed in |
-| `bluetooth-adv` | advertising data: every AD type, and the beacon and sensor formats; no `unsafe`, never panics on any input |
-| `bluetooth-host` | the host stack |
-| `bluetooth-bridge` | the standalone MQTT bridge |
+| Controller | Connection | Firmware | State |
+|---|---|---|---|
+| Realtek RTL8761B USB dongles (TP-Link UB500, ASUS USB-BT500) | `hci0` (btusb) | `rtl8761bu_fw`, loaded by the kernel | expected; Bluetooth 5 with extended advertising, 2M and coded PHY |
+| Nordic nRF52840 Dongle | H4 over USB serial | Zephyr `hci_uart` or `hci_usb` sample | expected; full Bluetooth 5 feature set |
+| Raspberry Pi 3, 4, 5 built-in | `hci0` | Broadcom/Cypress firmware, loaded by the kernel | expected; Bluetooth 4.1 to 5.0 features |
+| Intel AX200, AX210 and other btusb controllers | `hci0` | loaded by the kernel | expected |
+| Bluetooth 4.0 dongles (CSR8510 and similar) | `hci0` | | expected; no extended advertising or coded PHY |
+| Controllers that need vendor setup a kernel driver does not do, over raw UART | | | unsupported |
 
-HCI commands and events are encoded and decoded by
-[`bt-hci`](https://github.com/embassy-rs/bt-hci) (Embassy's HCI types), and
-the user channel socket comes from `bt-hci-linux`. Cryptography is
-RustCrypto's (`aes`, `cmac`, `ccm`, `p256`, `md-5`).
+Sensors: BTHome v2 devices (Shelly BLU, and sensors with BTHome firmware such
+as the ATC/pvvx firmware for Xiaomi thermometers), Ruuvi tags, KKM beacons,
+iBeacon, AltBeacon and Eddystone beacons are decoded; any other advertiser
+is published with its parsed advertising data. The
+[hardware page](https://pulzar-net.github.io/bluetooth-bridge/hardware.html)
+has the details.
 
-## Running the bridge
+## Quick start
 
+From nothing to a sensor in Home Assistant, on 64-bit Linux (x86_64 or
+aarch64) with a Bluetooth controller (`hci0`). You need an MQTT broker (for
+example Mosquitto) that Home Assistant's MQTT integration already uses.
+
+**1. Download the release and check its checksum.**
+
+<!-- quickstart:download -->
 ```sh
-git clone --recurse-submodules https://github.com/pulzar-net/bluetooth-bridge
-cargo build --release
-cp config.example.toml /etc/bluetooth-bridge/config.toml   # set adapter.transport
-bluetooth-bridge --config /etc/bluetooth-bridge/config.toml
+VERSION=0.1.0
+ARCH=$(uname -m)   # x86_64 or aarch64
+BASE=https://github.com/pulzar-net/bluetooth-bridge/releases/download/v$VERSION
+curl -fsSLO "$BASE/bluetooth-bridge-$ARCH-linux-musl"
+curl -fsSLO "$BASE/SHA256SUMS"
+sha256sum --check --ignore-missing SHA256SUMS
+sudo install -m 0755 "bluetooth-bridge-$ARCH-linux-musl" /usr/local/bin/bluetooth-bridge
+bluetooth-bridge --version
 ```
 
-With the HCI user channel the bridge owns the controller: stop `bluetoothd`
-(and anything else using `hci0`) first, and give the bridge `CAP_NET_ADMIN`.
-A UART controller with no kernel driver is opened with
-`transport = "serial:/dev/ttyACM0:1000000"`.
+**2. Free the controller.** The bridge drives the controller itself through
+the HCI user channel, so BlueZ must let go of it:
 
-`bluetooth-bridge probe hci0` names the controller and its features as JSON.
+```sh
+sudo systemctl stop bluetooth
+sudo bluetooth-bridge probe hci0
+```
 
-### Topics
+`probe` prints the controller and its features as JSON.
 
-Under `mqtt.base_topic` (`bluetooth`):
+**3. Write a minimal configuration** to `/etc/bluetooth-bridge/config.toml`.
+Only `adapter.transport` is required; everything else has a default.
 
-| Topic | What |
+<!-- quickstart:config -->
+```toml
+[adapter]
+transport = "hci0"
+
+[mqtt]
+host = "localhost"   # your broker
+```
+
+**4. Run it.** It needs `CAP_NET_ADMIN` for the user channel; `sudo` gives
+it that.
+
+<!-- quickstart:run -->
+```sh
+sudo bluetooth-bridge --config /etc/bluetooth-bridge/config.toml
+```
+
+**5. Bring a sensor in range.** There is no pairing for broadcast sensors:
+a BTHome or Ruuvi sensor appears within seconds, in Home Assistant under
+**Settings > Devices & services > MQTT**, and on MQTT:
+
+```sh
+mosquitto_sub -h localhost -t 'bluetooth/device/#' -v
+```
+
+No controller to spare? The [getting started guide](https://pulzar-net.github.io/bluetooth-bridge/getting-started.html)
+runs the same steps against Bumble's virtual controller. To run the bridge
+as a service, see [installation](#installation).
+
+## Installation
+
+- **Release binaries.** Each [release](https://github.com/pulzar-net/bluetooth-bridge/releases)
+  has static Linux binaries for `x86_64`, `aarch64` (Raspberry Pi 3 and newer
+  with a 64-bit OS) and `mipsel` (MT7621 and MT7628 routers), with a
+  `SHA256SUMS` file. They have no runtime dependencies.
+- **From source**, with Rust 1.89 or newer. The Bluetooth SIG's assigned
+  numbers are a git submodule, so clone with `--recurse-submodules`, or use
+  `cargo install --locked --git https://github.com/pulzar-net/bluetooth-bridge bluetooth-bridge`.
+- **systemd**: a hardened unit is in [`dist/systemd/`](dist/systemd/bluetooth-bridge.service).
+- **OpenWrt**: a procd init script is in [`dist/openwrt/`](dist/openwrt/bluetooth-bridge.init).
+
+The [installation guide](https://pulzar-net.github.io/bluetooth-bridge/installation.html)
+covers each one step by step.
+
+## Configuration
+
+The bridge reads one TOML file, `/etc/bluetooth-bridge/config.toml` by
+default (`--config FILE` to change it):
+
+| Table | What it sets |
 |---|---|
-| `bluetooth/bridge/state` | `{"state":"online"}` or `offline` (retained; the will) |
-| `bluetooth/bridge/info` | the controller and its capabilities (retained) |
-| `bluetooth/scan/<ADDRESS>` | each advertisement after duplicate filtering: RSSI, PHYs, TX power, SID, flags, raw data, every parsed field, decoded beacons |
-| `bluetooth/device/<ADDRESS>` | a device's decoded readings, for Home Assistant |
-| `bluetooth/bridge/event` | connections, pairing, notifications, GATT writes, periodic reports |
-| `bluetooth/bridge/request/<op>` | requests, JSON, with an optional `transaction` |
-| `bluetooth/bridge/response/<op>` | `{"transaction", "status": "ok" or "error", "data" or "error"}` |
+| `[adapter]` | the transport (`hci0`, `serial:PATH:BAUD`, `tcp:HOST:PORT`), name, pairing capabilities and policy, address |
+| `[mqtt]` | broker, credentials (password from a file), client id, base topic |
+| `[scan]` | active or passive, interval and window, coded PHY, duplicate filtering, address allow list, minimum RSSI |
+| `[homeassistant]` | discovery on or off, discovery prefix, Home Assistant's status topic |
+| `[data]` | the data directory: bonds and the bridge's own identity |
+| `[[bthome_keys]]`, `[[kkm_passwords]]`, `[[irks]]` | keys for encrypted sensors and for resolving private addresses |
+| `[[gatt_services]]`, `[[advertising]]` | GATT services the bridge serves and advertising sets it starts |
 
-`<ADDRESS>` is twelve upper-case hex digits (`BC5729000001`), the identity
-when a private address resolved.
+Unknown keys are an error, so a typo stops the bridge at startup. Every key,
+its type and default are in the
+[configuration reference](https://pulzar-net.github.io/bluetooth-bridge/config-reference.html),
+which is generated from the code. [`config.example.toml`](config.example.toml)
+shows them all. Log verbosity comes from `RUST_LOG` (default `info`).
 
-Requests: `info`, `scan/start` (`config`), `scan/stop`, `connect`
-(`address`, `params`), `disconnect`, `connections`, `connection/params`,
-`connection/phy`, `connection/data_length`, `connection/rssi`, `gatt/mtu`,
-`gatt/discover`, `gatt/read`, `gatt/write` (`value` hex,
-`without_response`), `gatt/subscribe`, `pair`, `secure`, `unpair`, `bonds`
-(never keys), `advertise/start` (`params`, `data`, `scan_response`),
-`advertise/data`, `advertise/stop`, `periodic/start`, `periodic/stop`,
-`periodic/sync`, `periodic/terminate`, `server/add` (a service definition),
-`server/set` (`notify` to push it to subscribers), `server/get`.
+## MQTT API
 
-Example:
+Everything lives under a base topic, `bluetooth` by default. Payloads are
+JSON. `<ADDRESS>` is twelve upper-case hex digits (`BC5729000001`): the
+device's identity address when its private address resolved.
 
-```sh
-mosquitto_pub -t bluetooth/bridge/request/connect -m '{"address":"C0:11:22:33:44:55/random","transaction":"1"}'
-mosquitto_pub -t bluetooth/bridge/request/gatt/read -m '{"handle":64,"attribute":3}'
+| Topic | Direction | What |
+|---|---|---|
+| `bluetooth/bridge/state` | out, retained | `{"state":"online"}` or `{"state":"offline"}` (also the last will) |
+| `bluetooth/bridge/info` | out, retained | the controller, its version and features |
+| `bluetooth/scan/<ADDRESS>` | out | each advertisement after duplicate filtering: RSSI, PHYs, raw data, every parsed field, decoded beacons |
+| `bluetooth/device/<ADDRESS>` | out | a sensor's decoded readings, for example `{"temperature":25.06,"humidity":50.55,"rssi":-50,"last_seen":1795138399393}` |
+| `bluetooth/bridge/event` | out | connections, pairing, notifications, GATT writes, periodic reports |
+| `bluetooth/bridge/request/<op>` | in | `scan/start`, `connect`, `gatt/read`, `gatt/write`, `pair`, `advertise/start`, `server/add` and 22 more |
+| `bluetooth/bridge/response/<op>` | out | `{"status":"ok","data":...}` or `{"status":"error","error":"..."}`, with the request's `transaction` |
+
+Keys never appear on MQTT; `bonds` lists who is bonded, not the keys. The
+[MQTT reference](https://pulzar-net.github.io/bluetooth-bridge/mqtt.html)
+has every request and payload with examples.
+
+## Use it as a library
+
+The bridge is a thin layer over library crates you can use on their own.
+
+| Crate | What it is |
+|---|---|
+| [`bluetooth-host`](crates/bluetooth-host) | the host stack: transports, scanning, advertising, connections, L2CAP, ATT and GATT, SMP, privacy, bonds |
+| [`bluetooth-adv`](crates/bluetooth-adv) | advertising data: every AD type, and beacon and sensor formats; no I/O |
+| [`bluetooth-numbers`](crates/bluetooth-numbers) | the Bluetooth SIG's assigned numbers as lookups, generated from the SIG's repository |
+| [`bluetooth-mesh`](crates/bluetooth-mesh) | Bluetooth Mesh (work in progress) |
+| [`bluetooth-bridge`](crates/bluetooth-bridge) | the MQTT bridge, as a binary and a library |
+
+The crates are not on crates.io yet; depend on them from git:
+
+```toml
+[dependencies]
+bluetooth-adv = { git = "https://github.com/pulzar-net/bluetooth-bridge", tag = "v0.1.0" }
 ```
 
-## Testing
+This example decodes a BTHome v2 temperature and humidity advertisement,
+the kind a sensor broadcasts, and prints `bt_home temperature: 25.06 °C` and
+`bt_home humidity: 50.55 %`. The host stack's own example (scan with a
+controller) is in the [library guide](https://pulzar-net.github.io/bluetooth-bridge/library/bluetooth-host.html).
 
-```sh
-python -m venv .venv && .venv/bin/pip install -r tests/bumble/requirements.txt
-BUMBLE_PYTHON=.venv/bin/python cargo test --workspace
+```rust
+use bluetooth_adv::beacon::{self, Context};
+use bluetooth_adv::Advertisement;
+
+// Flags, then BTHome service data: temperature 25.06 °C, humidity 50.55 %.
+let data = [
+    0x02, 0x01, 0x06,
+    0x0a, 0x16, 0xd2, 0xfc, 0x40, 0x02, 0xca, 0x09, 0x03, 0xbf, 0x13,
+];
+let adv = Advertisement::parse(&data);
+for b in beacon::decode(&adv, &Context::default()) {
+    for r in b.readings() {
+        println!("{} {}: {} {}", b.format(), r.key, r.value, r.unit);
+    }
+}
+# let readings = beacon::decode(&adv, &Context::default())[0].readings();
+# assert_eq!((readings[0].key.as_str(), readings[0].value), ("temperature", 25.06));
+# assert_eq!((readings[1].key.as_str(), readings[1].value), ("humidity", 50.55));
 ```
 
-- **End to end, against Bumble** (`crates/bluetooth-host/tests/bumble.rs`,
-  `crates/bluetooth-bridge/tests/mqtt.rs`): the host under test reaches a
-  Bumble virtual controller over H4 on TCP, exactly as it would a real one,
-  and `tests/bumble/peer.py` scripts the peer on the same simulated link:
-  scanning, advertising, periodic sync, central and peripheral GATT, L2CAP
-  channels both ways, every pairing method in both roles with bonding and
-  re-encryption, private address resolution, and the bridge over MQTT.
-- **HCI replay** (`tests/replay.rs`): a scripted controller answers commands
-  and sends exact event bytes, for what Bumble's coarse radio model cannot
-  carry (SIDs, legacy bits, fragmented reports, scan responses) and for a
-  Bluetooth 4 controller's limits. Recorded traffic from real chips goes
-  here.
-- **Crypto** against the Core Specification's test vectors (Vol 3, Part H,
-  Appendix D).
-- **Fuzzing** (`fuzz/`, cargo-fuzz) of every parser that reads the air or
-  the controller, with a stable smoke pass on every `cargo test --features
-  fuzzing`.
-- **Budgets**: under 8 MB resident scanning a busy site (5,000 advertisers,
-  200,000 reports), under 3 MB for the static bridge binary; both checked in
-  CI, with static aarch64 and mipsel musl builds tested under qemu.
+The [library guide](https://pulzar-net.github.io/bluetooth-bridge/library/index.html)
+covers each crate, including the host stack, and the
+[API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html)
+cover every item.
 
-## Hardware for a bench
+## Architecture
 
-- A **Bluetooth 5 USB dongle with an in-tree Linux driver**: one on a
-  Realtek RTL8761BU (btusb loads `rtl8761bu_fw`), such as the TP-Link UB500
-  or ASUS USB-BT500, gives extended advertising, 2M and coded PHY and DLE.
-- A **Nordic nRF52840 Dongle (PCA10059)** running Zephyr's `hci_uart` (or
-  `hci_usb`) sample as a full-feature controller over H4, and as a second,
-  scriptable test peer: periodic advertising, coded PHY, and later direction
-  finding with an antenna board.
+```text
+ Home Assistant, Node-RED, scripts
+                │  MQTT (JSON, Home Assistant discovery)
+┌───────────────┴───────────────────────────────────────┐
+│ bluetooth-bridge   topics, requests, readings,        │
+│                    discovery                          │
+├───────────────────────────────────────────────────────┤
+│ bluetooth-host     scanner, advertiser, connections,  │
+│                    L2CAP, ATT/GATT, SMP, privacy,     │
+│                    bonds                              │
+├────────────────────────┬──────────────────────────────┤
+│ bluetooth-adv          │ bt-hci (HCI commands and     │
+│ bluetooth-numbers      │ events, from Embassy)        │
+└────────────────────────┴───────────────┬──────────────┘
+                                         │ HCI user channel, H4 serial, H4 TCP
+                  Bluetooth controller (or Bumble's virtual controller)
+```
+
+The controller runs the radio and the link layer. Everything above HCI runs
+in the host, with no BlueZ and no kernel Bluetooth stack in the path. The
+[architecture page](https://pulzar-net.github.io/bluetooth-bridge/architecture.html)
+explains the layers and the design rules (no `unsafe`, no panics on radio
+input, bounded memory).
+
+## Compared with other projects
+
+| | bluetooth-bridge | [BlueZ](https://www.bluez.org) | Home Assistant's [Bluetooth integration](https://www.home-assistant.io/integrations/bluetooth/) |
+|---|---|---|---|
+| What it is | host stack on raw HCI, and an MQTT bridge | the Linux Bluetooth stack, with a D-Bus API | Home Assistant's use of BlueZ, with ESPHome proxies |
+| Language and runtime | Rust, one static binary | C, a system daemon and the kernel's stack | Python |
+| Bluetooth Classic | planned | yes, complete | through BlueZ |
+| Same behavior on every board | yes: it does not depend on the kernel's or BlueZ's version | depends on both | depends on BlueZ |
+| Interface | MQTT, Home Assistant discovery, Rust API | D-Bus, command-line tools | Home Assistant |
+| Shares the controller | no: it owns it | yes, with every program on the system | through BlueZ |
+| Maturity | 0.x, not yet hardware-tested | mature, the Linux standard | mature, very widely used |
+
+**Pick BlueZ** if other programs on the machine need Bluetooth too, if you
+need Classic profiles (audio, keyboards, serial) today, or if you want the
+standard Linux tools. **Pick Home Assistant's own integration** if Home
+Assistant runs next to the radio and its device support covers you.
+**Pick bluetooth-bridge** if you want Bluetooth LE on a router or gateway
+where BlueZ is missing, old or inconsistent, as MQTT for any consumer, or as
+a Rust library that behaves the same on every board.
+
+## Roadmap
+
+- **Next:** Bluetooth Mesh (provisioning, configuration, Generic models,
+  the proxy, in progress on `main`) and the first reports from real hardware.
+- **After that:** Classic BR/EDR (inquiry, Secure Simple Pairing, SDP,
+  RFCOMM), then direction finding.
+
+The [roadmap page](https://pulzar-net.github.io/bluetooth-bridge/roadmap.html)
+has the design for each. Ideas and requests go in
+[issues](https://github.com/pulzar-net/bluetooth-bridge/issues).
+
+## Contributing
+
+Contributions are welcome, from hardware reports to code. The whole stack
+can be developed and tested without hardware, against Bumble. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test, fuzz and send a
+change, and [the code of conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+Please report vulnerabilities privately through
+[GitHub private vulnerability reporting](https://github.com/pulzar-net/bluetooth-bridge/security/advisories/new),
+never in a public issue. See [SECURITY.md](SECURITY.md) for what to include
+and how fast we respond, and the
+[security model](https://pulzar-net.github.io/bluetooth-bridge/security.html)
+for what the bridge protects.
 
 ## License
 
-MIT. The assigned numbers come from the Bluetooth SIG's public repository
-and are the SIG's.
+MIT. See [LICENSE](LICENSE).
+
+The assigned numbers are generated at build time from the Bluetooth SIG's
+public repository and remain the SIG's; they are not copied into this
+repository. Bluetooth® is a registered trademark of the Bluetooth SIG, Inc.
+This project is not affiliated with or qualified by the Bluetooth SIG.
+
+## Maintained by Pulzar
+
+bluetooth-bridge is maintained by [Pulzar](https://pulzr.net), which uses it
+in its own gateways. It is developed in the open, for anyone to use.

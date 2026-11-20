@@ -1,0 +1,49 @@
+# bluetooth-host
+
+The Bluetooth host stack, over raw HCI. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html).
+
+## What it does
+
+- **Transports**: the Linux HCI user channel, H4 on a serial port, H4 over
+  TCP (`TransportSpec` parses `hci0`, `serial:PATH:BAUD`, `tcp:HOST:PORT`).
+- **Capability discovery**: everything the controller supports, read at
+  start; every feature checks before it asks.
+- **Observer**: passive and active scanning, legacy and extended reports,
+  the coded PHY, fragmented report reassembly, periodic advertising sync,
+  duplicate filtering in the host, and private addresses resolved to
+  identities.
+- **Broadcaster**: legacy, extended and periodic advertising sets.
+- **Connections** as central and peripheral, with parameter, PHY and data
+  length updates.
+- **L2CAP** signaling and LE credit-based channels.
+- **ATT and GATT**: a client with every procedure, and a server built at
+  run time with per-attribute security.
+- **SMP**: legacy and Secure Connections pairing, every association model,
+  bonding with a persistent key store, and privacy.
+- **Probe**: identify a controller with read-only commands.
+
+## Example: scanning
+
+{{#include ../../../crates/bluetooth-host/README.md:scan}}
+
+`Host::open` opens the transport and initializes the controller;
+`events()` is a broadcast receiver of `HostEvent`s, so several tasks can
+listen. This example is compiled in CI.
+
+## The main types
+
+| Type | What it is |
+|---|---|
+| `Host` | the stack; cheap to clone, methods take `&self` |
+| `HostConfig` | data directory for bonds, device name and appearance, pairing (IO capability, an `Agent` for passkeys and confirmations, bonding, MITM) |
+| `HostEvent` | advertisements, connections, pairing, GATT server activity, periodic reports |
+| `ScanConfig`, `AdvertisingParams` | how to scan and advertise |
+| `Connection` | one connection: parameters, PHY, L2CAP channels, `gatt()`, `pair()` |
+| `Address` | a device address with its type |
+
+## Features
+
+| Feature | Default | What |
+|---|---|---|
+| `serial` | yes | H4 over serial ports |
+| `schema` | no | JSON Schema for configuration types |

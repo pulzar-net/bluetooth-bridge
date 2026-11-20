@@ -1,0 +1,44 @@
+name: Device or hardware support
+description: Ask for support for a device, adapter or firmware, or report what works on yours.
+labels: [hardware]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [hardware page](https://pulzar-net.github.io/bluetooth-bridge/hardware.html) first. A report that something **works** is just as welcome: it moves hardware from "expected" to "tested".
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of report
+      options:
+        - A device or adapter does not work
+        - Please support this device or adapter
+        - It works (add it to the tested list)
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Controller and devices
+      description: Manufacturer and model of the device or controller, its firmware version, and a link to the product or its format documentation.
+      placeholder: "Govee H5075 thermometer"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `bluetooth-bridge --version`.
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What the bridge sees
+      description: For a sensor, a few of its messages from `bluetooth/scan/<ADDRESS>`. For a controller, the output of `bluetooth-bridge probe TRANSPORT`.
+      render: json
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: What works, what does not, links to the device's documentation or another project's support for it.

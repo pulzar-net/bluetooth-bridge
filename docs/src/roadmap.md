@@ -1,6 +1,8 @@
 # Roadmap: the milestones after LE
 
-Milestone 1 is Bluetooth LE, complete (see the README). These are designed
+Milestone 1 is Bluetooth LE, released as 0.1.0 (see the
+[README](https://github.com/pulzar-net/bluetooth-bridge#readme)). Milestone 2,
+Bluetooth Mesh, is in progress on `main`. These are designed
 now so that nothing in milestone 1 has to be undone to reach them. LE Audio
 (isochronous channels, LC3) is out of scope until someone needs it.
 
@@ -34,7 +36,7 @@ A crate `bluetooth-mesh` on the host:
   sequence numbers persisted with headroom, segmentation and reassembly with
   the SAR timers, friendship as a Low Power node's friend.
 - **Provisioning**: provisioner (PB-ADV and PB-GATT, OOB methods, ECDH from
-  the SMP toolbox), and the device side so the gateway can be provisioned
+  the SMP toolbox), and the device side so the bridge can be provisioned
   into an existing network.
 - **Access layer and models**: Configuration Server and Client, Health
   Server and Client, the Generic models (OnOff, Level, Default Transition
@@ -72,9 +74,9 @@ A crate `bluetooth-mesh` on the host:
   (`LE Connectionless IQ Report`) published raw.
 - **Connection-oriented CTE** request and response.
 - **Angles**: an estimator (MUSIC or a phase-difference method) over the IQ
-  samples for a configured antenna array, published per device; positioning
-  on the coverage map happens above the bridge, from several gateways'
-  angles and their surveyed positions.
+  samples for a configured antenna array, published per device. Turning
+  angles from several receivers into a position is left to the software
+  above the bridge.
 - **Hardware**: needs a controller with antenna switching (nRF52833 or
   nRF5340 with an antenna board); the capability discovery already reports
   the AoA, AoD and CTE feature bits.

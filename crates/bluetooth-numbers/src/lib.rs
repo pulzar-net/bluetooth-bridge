@@ -1,14 +1,5 @@
-//! The Bluetooth SIG's Assigned Numbers, as lookup functions.
-//!
-//! Every table is generated at build time from the YAML the SIG publishes in
-//! its public repository (<https://bitbucket.org/bluetooth-SIG/public>), so the
-//! names here are the SIG's own and a new assignment arrives with an update of
-//! that repository, never by editing this crate.
-//!
-//! ```
-//! assert_eq!(bluetooth_numbers::company(0x004c), Some("Apple, Inc."));
-//! assert_eq!(bluetooth_numbers::service(0x180f).map(|s| s.name), Some("Battery"));
-//! ```
+#![doc = include_str!("../README.md")]
+
 #![no_std]
 
 include!(concat!(env!("OUT_DIR"), "/tables.rs"));
