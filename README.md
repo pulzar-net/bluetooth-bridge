@@ -150,8 +150,8 @@ as a service, see [installation](#installation).
 - **From source**, with Rust 1.89 or newer. The Bluetooth SIG's assigned
   numbers are a git submodule, so clone with `--recurse-submodules`, or use
   `cargo install --locked --git https://github.com/pulzar-net/bluetooth-bridge bluetooth-bridge`.
-- **systemd**: a hardened unit is in [`dist/systemd/`](dist/systemd/bluetooth-bridge.service).
-- **OpenWrt**: a procd init script is in [`dist/openwrt/`](dist/openwrt/bluetooth-bridge.init).
+- **systemd**: a hardened unit is in [`contrib/systemd/`](contrib/systemd/bluetooth-bridge.service).
+- **OpenWrt**: a procd init script is in [`contrib/openwrt/`](contrib/openwrt/bluetooth-bridge.init).
 
 The [installation guide](https://pulzar-net.github.io/bluetooth-bridge/installation.html)
 covers each one step by step.

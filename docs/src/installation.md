@@ -64,7 +64,7 @@ A UART controller with no kernel driver (an nRF52840 running Zephyr's
 ## As a systemd service
 
 The repository has a hardened unit in
-[`dist/systemd/bluetooth-bridge.service`](https://github.com/pulzar-net/bluetooth-bridge/blob/main/dist/systemd/bluetooth-bridge.service).
+[`contrib/systemd/bluetooth-bridge.service`](https://github.com/pulzar-net/bluetooth-bridge/blob/main/contrib/systemd/bluetooth-bridge.service).
 It runs the bridge as an unprivileged dynamic user with only
 `CAP_NET_ADMIN`, keeps its bonds in `/var/lib/bluetooth-bridge`, and
 restarts it on failure.
@@ -72,7 +72,7 @@ restarts it on failure.
 ```sh
 sudo mkdir -p /etc/bluetooth-bridge
 sudo cp config.example.toml /etc/bluetooth-bridge/config.toml   # then edit it
-sudo install -m 0644 dist/systemd/bluetooth-bridge.service /etc/systemd/system/
+sudo install -m 0644 contrib/systemd/bluetooth-bridge.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now bluetooth-bridge
 journalctl -u bluetooth-bridge -f
@@ -95,7 +95,7 @@ The `mipsel` binary runs on MT7621 and MT7628 routers with OpenWrt.
    directory on flash**, such as `/etc/bluetooth-bridge/data`: `/var` is in
    RAM on OpenWrt, and bonds would be lost at reboot.
 4. Install the procd script from
-   [`dist/openwrt/bluetooth-bridge.init`](https://github.com/pulzar-net/bluetooth-bridge/blob/main/dist/openwrt/bluetooth-bridge.init):
+   [`contrib/openwrt/bluetooth-bridge.init`](https://github.com/pulzar-net/bluetooth-bridge/blob/main/contrib/openwrt/bluetooth-bridge.init):
 
 ```sh
 cp bluetooth-bridge.init /etc/init.d/bluetooth-bridge
