@@ -1,4 +1,7 @@
-# Sensors and beacons
+---
+title: "Sensors and beacons"
+description: "Most Bluetooth LE sensors never need a connection: they put their readings in advertisements, and anything in range can read them."
+---
 
 Most Bluetooth LE sensors never need a connection: they put their readings
 in advertisements, and anything in range can read them. bluetooth-bridge
@@ -52,7 +55,7 @@ Two ways to keep them one device:
 
 - **Pair with them.** A bond includes the device's IRK, and the bridge
   resolves its addresses from then on (see
-  [Connections, GATT and pairing](connections.md)).
+  [Connections, GATT and pairing](/bluetooth-bridge/connections.html)).
 - **Enter the IRK** when you know it without pairing (some tags print it,
   or you exported it from another system):
 
@@ -78,6 +81,6 @@ only; `bluetooth/bridge/info` lists the features yours has.
 
 ## Adding a format
 
-Formats live in [bluetooth-adv](library/bluetooth-adv.md), with no I/O, so a
+Formats live in [bluetooth-adv](/bluetooth-bridge/library/bluetooth-adv.html), with no I/O, so a
 new one is a parser and its tests against captured advertisements. See
 [CONTRIBUTING.md](https://github.com/pulzar-net/bluetooth-bridge/blob/main/CONTRIBUTING.md).

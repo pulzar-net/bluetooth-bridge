@@ -1,4 +1,7 @@
-# Home Assistant
+---
+title: "Home Assistant"
+description: "bluetooth-bridge works with Home Assistant through its MQTT integration and MQTT discovery."
+---
 
 bluetooth-bridge works with Home Assistant through its
 [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) and

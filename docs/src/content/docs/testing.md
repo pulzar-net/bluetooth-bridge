@@ -1,4 +1,7 @@
-# Testing
+---
+title: "Testing"
+description: "The whole stack is developed and tested without hardware."
+---
 
 The whole stack is developed and tested without hardware. CI runs every
 test on every commit.
@@ -75,7 +78,7 @@ cd fuzz && cargo +nightly fuzz list
 ## Documentation
 
 The `docs` workflow checks the claims this site makes: the
-[configuration reference](config-reference.md) is regenerated from the code
+[configuration reference](/bluetooth-bridge/config-reference.html) is regenerated from the code
 and compared, every doctest runs (the README's library example among them),
 the README's quick start runs against Bumble, the workspace builds on the
 minimum supported Rust version, and every relative link resolves.

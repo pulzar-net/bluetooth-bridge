@@ -1,4 +1,7 @@
-# bluetooth-bridge
+---
+title: "bluetooth-bridge"
+description: "bluetooth-bridge is a Bluetooth host stack that runs directly on HCI, and a Bluetooth LE to MQTT bridge, written in Rust."
+---
 
 bluetooth-bridge is a Bluetooth host stack that runs directly on HCI, and a
 Bluetooth LE to MQTT bridge, written in Rust. It drives a Bluetooth
@@ -17,15 +20,15 @@ cover every type and function.
 
 | You want to | Read |
 |---|---|
-| try it without hardware | [Getting started](getting-started.md) |
-| run it with a controller | [Installation](installation.md), then [Hardware](hardware.md) |
-| see sensors in Home Assistant | [Sensors and beacons](sensors.md), [Home Assistant](home-assistant.md) |
-| connect to a device, read and write GATT | [Connections, GATT and pairing](connections.md) |
-| script it or build on its topics | [MQTT API](mqtt.md) |
-| change a setting | [Configuration](configuration.md) and the [reference](config-reference.md) |
-| embed the stack in Rust | [Library overview](library/index.md) |
-| understand how it works | [Architecture](architecture.md) |
-| fix a problem | [Troubleshooting and FAQ](troubleshooting.md) |
+| try it without hardware | [Getting started](/bluetooth-bridge/getting-started.html) |
+| run it with a controller | [Installation](/bluetooth-bridge/installation.html), then [Hardware](/bluetooth-bridge/hardware.html) |
+| see sensors in Home Assistant | [Sensors and beacons](/bluetooth-bridge/sensors.html), [Home Assistant](/bluetooth-bridge/home-assistant.html) |
+| connect to a device, read and write GATT | [Connections, GATT and pairing](/bluetooth-bridge/connections.html) |
+| script it or build on its topics | [MQTT API](/bluetooth-bridge/mqtt.html) |
+| change a setting | [Configuration](/bluetooth-bridge/configuration.html) and the [reference](/bluetooth-bridge/config-reference.html) |
+| embed the stack in Rust | [Library overview](/bluetooth-bridge/library.html) |
+| understand how it works | [Architecture](/bluetooth-bridge/architecture.html) |
+| fix a problem | [Troubleshooting and FAQ](/bluetooth-bridge/troubleshooting.html) |
 
 ## Status
 

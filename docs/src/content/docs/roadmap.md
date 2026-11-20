@@ -1,4 +1,7 @@
-# Roadmap: the milestones after LE
+---
+title: "Roadmap: the milestones after LE"
+description: "Milestone 1 is Bluetooth LE, released as 0.1.0 (see the README)."
+---
 
 Milestone 1 is Bluetooth LE, released as 0.1.0 (see the
 [README](https://github.com/pulzar-net/bluetooth-bridge#readme)). Milestone 2,

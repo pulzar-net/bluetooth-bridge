@@ -1,0 +1,61 @@
+---
+title: bluetooth-bridge
+description: A Bluetooth host stack on raw HCI and a Bluetooth LE to MQTT bridge in Rust, with no BlueZ, as one static binary.
+template: splash
+---
+
+import { Hero, Features, ReleaseDownload, StatusMatrix } from '@pulzar-net/docs-theme/components';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<Hero
+	eyebrow="Pulzar open source"
+	title="bluetooth-bridge"
+	tagline="A Bluetooth host stack that runs directly on HCI, with no BlueZ, and a Bluetooth LE to MQTT bridge. Sensors in Home Assistant, GATT and pairing over MQTT, in one static binary."
+	actions={[
+		{ text: 'Get started', link: '/bluetooth-bridge/getting-started.html', icon: 'right-arrow' },
+		{ text: 'Sensors', link: '/bluetooth-bridge/sensors.html', variant: 'minimal' },
+		{ text: 'GitHub', link: 'https://github.com/pulzar-net/bluetooth-bridge', variant: 'minimal', icon: 'github' },
+	]}
+/>
+
+<Features
+	items={[
+		{ title: 'No BlueZ', body: 'The HCI user channel, H4 over UART or TCP. The same behavior on every board, whatever its kernel.', icon: 'setting', link: '/bluetooth-bridge/architecture.html' },
+		{ title: 'Sensors without pairing', body: 'BTHome (encrypted too), Ruuvi, KKM, iBeacon and Eddystone decoded into readings.', icon: 'star', link: '/bluetooth-bridge/sensors.html' },
+		{ title: 'Home Assistant', body: 'Every sensor with readings appears through MQTT discovery.', icon: 'puzzle', link: '/bluetooth-bridge/home-assistant.html' },
+		{ title: 'GATT and pairing over MQTT', body: 'Connect, read, write, subscribe, pair and bond; serve your own GATT services.', icon: 'random', link: '/bluetooth-bridge/connections.html' },
+		{ title: 'Bluetooth Mesh', body: 'The bridge provisions, configures and switches mesh nodes. In progress.', icon: 'seti:graphql', link: '/bluetooth-bridge/roadmap.html' },
+		{ title: 'Tested without hardware', body: 'Every role and pairing method runs against Bumble\'s virtual controllers in CI.', icon: 'laptop', link: '/bluetooth-bridge/testing.html' },
+	]}
+/>
+
+## Install
+
+<ReleaseDownload repo="pulzar-net/bluetooth-bridge" version="0.1.0" binary="bluetooth-bridge" />
+
+Then follow [getting started](/bluetooth-bridge/getting-started.html), or
+[install it as a service](/bluetooth-bridge/installation.html).
+
+## Status
+
+bluetooth-bridge is 0.x: every role, pairing method and GATT operation is tested in CI against virtual controllers, but no release has been tested on real hardware yet.
+
+<StatusMatrix
+	rows={[
+		{ feature: 'HCI user channel, H4 over UART and TCP', status: 'done', note: '0.1.0' },
+		{ feature: 'Scanning, advertising, beacons and sensors, Home Assistant discovery', status: 'done', note: '0.1.0' },
+		{ feature: 'Connections, L2CAP, GATT client and server, pairing and bonds, privacy', status: 'done', note: '0.1.0' },
+		{ feature: 'Bluetooth Mesh: provisioner in the bridge, GATT proxy in the library', status: 'progress' },
+		{ feature: 'Testing on real controllers', status: 'progress' },
+		{ feature: 'Classic BR/EDR, then direction finding', status: 'planned' },
+	]}
+/>
+
+## Where to go next
+
+<CardGrid>
+	<LinkCard title="Hardware" description="Which controllers work, and how to check one." href="/bluetooth-bridge/hardware.html" />
+	<LinkCard title="MQTT API" description="Every topic, request and event." href="/bluetooth-bridge/mqtt.html" />
+	<LinkCard title="Configuration reference" description="Every key, generated from the code." href="/bluetooth-bridge/config-reference.html" />
+	<LinkCard title="API documentation" description="Every crate, type and function." href="https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html" />
+</CardGrid>

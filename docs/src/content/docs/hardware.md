@@ -1,4 +1,7 @@
-# Hardware
+---
+title: "Hardware"
+description: "bluetooth-bridge drives a Bluetooth controller over standard HCI."
+---
 
 bluetooth-bridge drives a Bluetooth controller over standard HCI. It asks
 the controller what it supports at start and uses only that, so a

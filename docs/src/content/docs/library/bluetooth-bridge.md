@@ -1,4 +1,7 @@
-# bluetooth-bridge (crate)
+---
+title: "bluetooth-bridge (crate)"
+description: "The bridge as a library: the same code as the binary."
+---
 
 The bridge as a library: the same code as the binary. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_bridge/index.html).
 
@@ -9,5 +12,5 @@ The bridge as a library: the same code as the binary. [API docs](https://pulzar-
   the same request vocabulary in your own transport.
 - `ha` builds the Home Assistant discovery messages.
 
-The [MQTT API](../mqtt.md) and [configuration reference](../config-reference.md)
+The [MQTT API](/bluetooth-bridge/mqtt.html) and [configuration reference](/bluetooth-bridge/config-reference.html)
 document the behavior.

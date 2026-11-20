@@ -1,4 +1,7 @@
-# Getting started
+---
+title: "Getting started"
+description: "This page runs bluetooth-bridge end to end without Bluetooth hardware."
+---
 
 This page runs bluetooth-bridge end to end without Bluetooth hardware. A
 virtual controller from [Bumble](https://github.com/google/bumble) takes
@@ -88,8 +91,8 @@ privacy the same way.
 
 ## Next steps
 
-- [Install](installation.md) a release binary as a service.
-- [Pick a controller](hardware.md) and set `adapter.transport` to it.
+- [Install](/bluetooth-bridge/installation.html) a release binary as a service.
+- [Pick a controller](/bluetooth-bridge/hardware.html) and set `adapter.transport` to it.
   `bluetooth-bridge probe hci0` shows what it can do.
-- Read [Sensors and beacons](sensors.md) for encrypted sensors, and the
-  [MQTT API](mqtt.md) for every request.
+- Read [Sensors and beacons](/bluetooth-bridge/sensors.html) for encrypted sensors, and the
+  [MQTT API](/bluetooth-bridge/mqtt.html) for every request.

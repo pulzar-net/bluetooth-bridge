@@ -1,4 +1,7 @@
-# Troubleshooting and FAQ
+---
+title: "Troubleshooting and FAQ"
+description: "Start with the log."
+---
 
 Start with the log. Run the bridge with `RUST_LOG=debug` for every
 request and event, or `RUST_LOG=bluetooth_host=debug,info` for the host
@@ -14,7 +17,7 @@ disabled. While the kernel is still loading the chip's firmware, the bridge
 waits and retries on its own.
 
 **`Operation not permitted` opening `hci0`.** The user channel needs
-`CAP_NET_ADMIN`: run as root, or use the [systemd unit](installation.md#as-a-systemd-service).
+`CAP_NET_ADMIN`: run as root, or use the [systemd unit](/bluetooth-bridge/installation.html#as-a-systemd-service).
 
 **No `hci0`.** The kernel has no driver for the controller, or its firmware
 is missing: check `dmesg` for the btusb (or UART) driver's messages and
@@ -33,13 +36,13 @@ control (`:noflow` turns RTS/CTS off) against the controller's firmware.
   yet. [Tell us](https://github.com/pulzar-net/bluetooth-bridge/issues/new?template=device.yml),
   with a few of its `scan/` messages.
 - It is there with `"undecryptable": true`: it encrypts; add its key
-  ([Sensors and beacons](sensors.md)).
+  ([Sensors and beacons](/bluetooth-bridge/sensors.html)).
 - It is not there: check `scan.allow` and `scan.min_rssi`, and range. A
   sensor that only advertises on the coded PHY needs a controller that
   supports it.
 
 **A device keeps changing address.** It uses private addresses. Pair with it
-or enter its IRK; see [Devices with private addresses](sensors.md#devices-with-private-addresses).
+or enter its IRK; see [Devices with private addresses](/bluetooth-bridge/sensors.html#devices-with-private-addresses).
 
 **Too much MQTT traffic.** Use `scan.dedup = "changes"` or a longer
 interval, `scan.allow` for the devices you care about, and
@@ -63,7 +66,7 @@ channel gives one program exclusive access. Use a second controller (a USB
 dongle) for the bridge if the machine needs BlueZ too.
 
 **Does it support Bluetooth Classic (audio, keyboards, serial ports)?** Not
-yet; Classic BR/EDR is on the [roadmap](roadmap.md).
+yet; Classic BR/EDR is on the [roadmap](/bluetooth-bridge/roadmap.html).
 
 **Does it work on macOS or Windows?** The HCI user channel is Linux only.
 `serial:` and `tcp:` transports work wherever the bridge builds, but there

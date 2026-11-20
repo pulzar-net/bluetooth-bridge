@@ -1,11 +1,14 @@
-# bluetooth-numbers
+---
+title: "bluetooth-numbers"
+description: "The Bluetooth SIG's Assigned Numbers as lookup functions: company identifiers; service, characteristic, descriptor, unit, member and SDO UUIDs; AD types; appearances; URI schemes; core versions;..."
+---
 
 The Bluetooth SIG's Assigned Numbers as lookup functions: company
 identifiers; service, characteristic, descriptor, unit, member and SDO
 UUIDs; AD types; appearances; URI schemes; core versions; PSMs; format
 types; and the Mesh opcodes and model identifiers. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_numbers/index.html).
 
-```rust,ignore
+```rust
 assert_eq!(bluetooth_numbers::company(0x004c), Some("Apple, Inc."));
 ```
 

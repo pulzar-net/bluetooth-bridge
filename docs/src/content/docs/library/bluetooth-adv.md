@@ -1,4 +1,7 @@
-# bluetooth-adv
+---
+title: "bluetooth-adv"
+description: "Bluetooth LE advertising data and the beacon and sensor formats carried in it."
+---
 
 Bluetooth LE advertising data and the beacon and sensor formats carried in
 it. No I/O, no `unsafe`, never panics on any input. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_adv/index.html).

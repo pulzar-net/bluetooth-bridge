@@ -1,4 +1,7 @@
-# Architecture
+---
+title: "Architecture"
+description: "A Bluetooth system is split at HCI, the Host Controller Interface:"
+---
 
 ## Who does what
 

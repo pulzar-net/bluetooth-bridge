@@ -1,7 +1,10 @@
-# Installation
+---
+title: "Installation"
+description: "bluetooth-bridge is one static Linux binary."
+---
 
 bluetooth-bridge is one static Linux binary. Pick one of the ways below,
-then [configure](configuration.md) it.
+then [configure](/bluetooth-bridge/configuration.html) it.
 
 ## Release binaries
 

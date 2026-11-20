@@ -1,9 +1,12 @@
-# Connections, GATT and pairing
+---
+title: "Connections, GATT and pairing"
+description: "Beyond sensors, the bridge exposes the whole LE host over MQTT: it can connect to devices as a central, read and write their GATT characteristics, pair and bond, serve its own GATT services as a..."
+---
 
 Beyond sensors, the bridge exposes the whole LE host over MQTT: it can
 connect to devices as a central, read and write their GATT characteristics,
 pair and bond, serve its own GATT services as a peripheral, and advertise.
-Every operation is a [request](mqtt.md#requests-and-responses).
+Every operation is a [request](/bluetooth-bridge/mqtt.html#requests-and-responses).
 
 ## Connecting and reading
 

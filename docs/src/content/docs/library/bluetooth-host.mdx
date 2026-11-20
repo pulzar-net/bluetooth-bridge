@@ -1,4 +1,10 @@
-# bluetooth-host
+---
+title: "bluetooth-host"
+description: "The Bluetooth host stack, over raw HCI."
+---
+
+import README_scan from '../../../../../crates/bluetooth-host/README.md?raw';
+import { Snippet } from '@pulzar-net/docs-theme/components';
 
 The Bluetooth host stack, over raw HCI. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html).
 
@@ -24,7 +30,7 @@ The Bluetooth host stack, over raw HCI. [API docs](https://pulzar-net.github.io/
 
 ## Example: scanning
 
-{{#include ../../../crates/bluetooth-host/README.md:scan}}
+<Snippet code={README_scan} anchor="scan" lang="rust" />
 
 `Host::open` opens the transport and initializes the controller;
 `events()` is a broadcast receiver of `HostEvent`s, so several tasks can

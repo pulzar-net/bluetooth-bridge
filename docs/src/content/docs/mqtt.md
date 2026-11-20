@@ -1,4 +1,7 @@
-# MQTT API
+---
+title: "MQTT API"
+description: "The bridge publishes and listens under one base topic, bluetooth unless mqtt.base_topic says otherwise."
+---
 
 The bridge publishes and listens under one base topic, `bluetooth` unless
 `mqtt.base_topic` says otherwise. Every payload is JSON. This page uses the
@@ -53,7 +56,7 @@ PHY, legacy advertising without extended sets, and so on.
 
 ## `scan/<ADDRESS>`
 
-Every advertisement that passes [duplicate filtering](configuration.md#duplicate-filtering-and-traffic),
+Every advertisement that passes [duplicate filtering](/bluetooth-bridge/configuration.html#duplicate-filtering-and-traffic),
 with its scan response when one came (abridged):
 
 ```json
@@ -96,7 +99,7 @@ strength and when it was last heard (Unix milliseconds):
 ```
 
 Only devices with decoded readings get this topic, and a Home Assistant
-device. See [Sensors and beacons](sensors.md) for the formats.
+device. See [Sensors and beacons](/bluetooth-bridge/sensors.html) for the formats.
 
 ## Requests and responses
 
@@ -116,7 +119,7 @@ alongside each other and scanning.
 
 | Op | Fields | Data |
 |---|---|---|
-| `scan/start` | `config`: the [`[scan]` keys](config-reference.md) other than `enabled`, `allow`, `min_rssi`, `publish_reports` | |
+| `scan/start` | `config`: the [`[scan]` keys](/bluetooth-bridge/config-reference.html) other than `enabled`, `allow`, `min_rssi`, `publish_reports` | |
 | `scan/stop` | | |
 
 ### Connections
@@ -156,7 +159,7 @@ Notifications and indications arrive as `notification` events.
 
 | Op | Fields | Data |
 |---|---|---|
-| `advertise/start` | `params` (as in [`[[advertising]]`](config-reference.md)), `data`, `scan_response` (hex AD structures) | `set` |
+| `advertise/start` | `params` (as in [`[[advertising]]`](/bluetooth-bridge/config-reference.html)), `data`, `scan_response` (hex AD structures) | `set` |
 | `advertise/data` | `set`, `data`, `scan_response` | |
 | `advertise/stop` | `set` | |
 | `periodic/start` | `set`, `params`, `data` | |
@@ -168,7 +171,7 @@ Notifications and indications arrive as `notification` events.
 
 | Op | Fields | Data |
 |---|---|---|
-| `server/add` | `service`: a service definition, as in [`[[gatt_services]]`](config-reference.md) | the handles of the service, its characteristics and descriptors |
+| `server/add` | `service`: a service definition, as in [`[[gatt_services]]`](/bluetooth-bridge/config-reference.html) | the handles of the service, its characteristics and descriptors |
 | `server/set` | `attribute`, `value` (hex), `notify` | `notified` (how many clients), when `notify` |
 | `server/get` | `attribute` | `value` |
 
@@ -222,4 +225,4 @@ duplicate filtering never drops them.
 
 With `homeassistant.enabled` (the default), the bridge also publishes
 discovery messages under `homeassistant/` for each sensor with decoded
-readings, and for the bridge itself. See [Home Assistant](home-assistant.md).
+readings, and for the bridge itself. See [Home Assistant](/bluetooth-bridge/home-assistant.html).

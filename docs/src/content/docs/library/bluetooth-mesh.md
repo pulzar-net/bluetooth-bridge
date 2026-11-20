@@ -1,4 +1,7 @@
-# bluetooth-mesh
+---
+title: "bluetooth-mesh"
+description: "Bluetooth Mesh on the bluetooth-host stack."
+---
 
 Bluetooth Mesh on the bluetooth-host stack. **Work in progress** on `main`,
 not in a release; the API will change. [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh/index.html).
@@ -17,5 +20,5 @@ What is there:
   node, over the advertising bearer or GATT through the Mesh Proxy service.
 
 It is tested end to end on two Bumble controllers. The bridge uses it as a
-provisioner (`[mesh] enabled`, see the [MQTT API](../mqtt.md#bluetooth-mesh));
-the [roadmap](../roadmap.md) lists what is built and what comes next.
+provisioner (`[mesh] enabled`, see the [MQTT API](/bluetooth-bridge/mqtt.html#bluetooth-mesh));
+the [roadmap](/bluetooth-bridge/roadmap.html) lists what is built and what comes next.
