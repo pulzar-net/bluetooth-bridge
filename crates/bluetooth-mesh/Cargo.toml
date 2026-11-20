@@ -11,6 +11,7 @@ keywords = ["bluetooth", "mesh", "ble"]
 categories = ["network-programming", "hardware-support"]
 
 [dependencies]
+bluetooth-host.workspace = true
 aes.workspace = true
 ccm.workspace = true
 cmac.workspace = true

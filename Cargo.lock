@@ -298,6 +298,7 @@ name = "bluetooth-mesh"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "bluetooth-host",
  "ccm",
  "cmac",
  "hex",
