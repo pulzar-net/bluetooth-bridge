@@ -49,6 +49,7 @@ Scanning. (Unknown keys cannot be refused here: serde does not allow that with a
 | `coded` | boolean | `true` | Scan on the coded PHY too (long range), when the controller can. |
 | `filter_accept_list` | boolean | `false` | Only devices on the filter accept list. |
 | `dedup` | `"off"` or `"changes"` or `{ interval_ms = integer (from 0) }` | `{ interval_ms = 10000 }` | Duplicate filtering. Report every advertisement received. Report a device again only when its data changes. Report when its data changes, and at least every this many milliseconds while it is heard (so presence and RSSI stay current). |
+| `always_report` | array of integer (0 to 255) | unset | AD types whose advertisements are reported every time, whatever `dedup` says: a protocol carried in advertisements, such as Mesh (`0x29` to `0x2b`), whose retransmissions are identical and must not be filtered as duplicates. |
 | `allow` | array of string | `[]` | Publish only devices whose address starts with one of these (`BC:57:29`, say); empty publishes everything. |
 | `min_rssi` | integer (-128 to 127) | `-127` | Ignore weaker signals, dBm. |
 | `publish_reports` | boolean | `true` | Publish every report on `<base>/scan/<address>`. |
@@ -179,3 +180,11 @@ How a set advertises.
 | `max_events` | integer (0 to 255) | unset | Stop after this many events (extended). |
 | `filter_accept_list` | boolean | `false` | Only answer scan and connection requests from the filter accept list. |
 | `scan_request_notifications` | boolean | `false` | Report scan requests as [`crate::HostEvent::ScanRequest`]. |
+
+## `[mesh]`
+
+Bluetooth Mesh: the bridge provisions, configures and controls nodes on the advertising bearer, its network kept in `<data>/mesh`.
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | boolean | `false` | On. The first start creates the network, with the bridge at 0x0001. |

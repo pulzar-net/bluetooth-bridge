@@ -94,6 +94,13 @@
         "$ref": "#/$defs/AdvertisingEntry"
       },
       "default": []
+    },
+    "mesh": {
+      "description": "Bluetooth Mesh, with the bridge as the provisioner.",
+      "$ref": "#/$defs/MeshConfig",
+      "default": {
+        "enabled": false
+      }
     }
   },
   "additionalProperties": false,
@@ -289,6 +296,16 @@
           "$ref": "#/$defs/Dedup",
           "default": {
             "interval_ms": 10000
+          }
+        },
+        "always_report": {
+          "description": "AD types whose advertisements are reported every time, whatever\n`dedup` says: a protocol carried in advertisements, such as Mesh\n(`0x29` to `0x2b`), whose retransmissions are identical and must not\nbe filtered as duplicates.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "uint8",
+            "minimum": 0,
+            "maximum": 255
           }
         },
         "allow": {
@@ -764,6 +781,18 @@
           "const": "le_coded"
         }
       ]
+    },
+    "MeshConfig": {
+      "description": "Bluetooth Mesh: the bridge provisions, configures and controls nodes on\nthe advertising bearer, its network kept in `<data>/mesh`.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "On. The first start creates the network, with the bridge at 0x0001.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

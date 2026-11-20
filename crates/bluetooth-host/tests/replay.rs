@@ -319,6 +319,40 @@ async fn duplicate_filtering_by_change_and_interval() {
 }
 
 #[tokio::test]
+async fn always_reported_ad_types_pass_duplicate_filtering() {
+    let (host, chip) = start(bt5()).await;
+    let mut ev = host.events();
+    host.start_scan(ScanConfig {
+        dedup: Dedup::Changes,
+        always_report: vec![0x29],
+        ..ScanConfig::default()
+    })
+    .await
+    .unwrap();
+    // A PB-ADV PDU sent three times, identical, then a plain one twice.
+    let pb_adv = [4, 0x29, 1, 2, 3];
+    for _ in 0..3 {
+        chip.event(ext_report(0x0000, ADDR, 1, 127, -50, 0, &pb_adv))
+            .await;
+    }
+    for _ in 0..2 {
+        chip.event(ext_report(0x0000, ADDR, 1, 127, -50, 0, &[2, 1, 6]))
+            .await;
+    }
+    chip.event(ext_report(0x0000, ADDR, 1, 127, -50, 0, &[2, 1, 4]))
+        .await;
+    for _ in 0..3 {
+        assert_eq!(next_report(&mut ev).await.data, pb_adv.to_vec());
+    }
+    assert_eq!(next_report(&mut ev).await.data, vec![2, 1, 6]);
+    assert_eq!(
+        next_report(&mut ev).await.data,
+        vec![2, 1, 4],
+        "the repeat is filtered"
+    );
+}
+
+#[tokio::test]
 async fn a_bluetooth_4_controller_degrades_cleanly() {
     let (host, chip) = start(pi3()).await;
     let caps = host.capabilities().clone();

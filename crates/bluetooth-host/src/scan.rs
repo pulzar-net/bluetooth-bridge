@@ -60,6 +60,12 @@ pub struct ScanConfig {
     pub filter_accept_list: bool,
     /// Duplicate filtering.
     pub dedup: Dedup,
+    /// AD types whose advertisements are reported every time, whatever
+    /// `dedup` says: a protocol carried in advertisements, such as Mesh
+    /// (`0x29` to `0x2b`), whose retransmissions are identical and must not
+    /// be filtered as duplicates.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub always_report: Vec<u8>,
 }
 
 impl Default for ScanConfig {
@@ -71,6 +77,7 @@ impl Default for ScanConfig {
             coded: true,
             filter_accept_list: false,
             dedup: Dedup::IntervalMs(10_000),
+            always_report: Vec::new(),
         }
     }
 }
@@ -274,7 +281,13 @@ fn deliver(host: &Host, i: Incoming) {
     let identity = host.inner.keys.resolve(&i.address);
     let report = {
         let mut sc = host.inner.scanner.lock().unwrap_or_else(|e| e.into_inner());
-        let Some(dedup) = sc.config.as_ref().map(|c| c.dedup) else {
+        let Some((dedup, always)) = sc.config.as_ref().map(|c| {
+            let always = !c.always_report.is_empty()
+                && bluetooth_adv::AdStructures::new(&i.data)
+                    .flatten()
+                    .any(|s| c.always_report.contains(&s.ad_type));
+            (c.dedup, always)
+        }) else {
             return;
         };
         sc.prune(now);
@@ -316,16 +329,17 @@ fn deliver(host: &Host, i: Incoming) {
         seen.scan_rsp.hash(&mut h);
         let hash = h.finish();
         let changed = hash != seen.hash || seen.emitted.is_none();
-        let emit = match dedup {
-            Dedup::Off => true,
-            Dedup::Changes => changed,
-            Dedup::IntervalMs(ms) => {
-                changed
-                    || seen
-                        .emitted
-                        .is_none_or(|t| now.duration_since(t) >= Duration::from_millis(ms))
-            }
-        };
+        let emit = always
+            || match dedup {
+                Dedup::Off => true,
+                Dedup::Changes => changed,
+                Dedup::IntervalMs(ms) => {
+                    changed
+                        || seen
+                            .emitted
+                            .is_none_or(|t| now.duration_since(t) >= Duration::from_millis(ms))
+                }
+            };
         if !emit {
             return;
         }

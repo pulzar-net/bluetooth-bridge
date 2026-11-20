@@ -40,6 +40,19 @@ pub struct Config {
     /// Advertising sets started with the bridge.
     #[serde(default)]
     pub advertising: Vec<AdvertisingEntry>,
+    /// Bluetooth Mesh, with the bridge as the provisioner.
+    #[serde(default)]
+    pub mesh: MeshConfig,
+}
+
+/// Bluetooth Mesh: the bridge provisions, configures and controls nodes on
+/// the advertising bearer, its network kept in `<data>/mesh`.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[cfg_attr(feature = "schema", derive(serde::Serialize, schemars::JsonSchema))]
+#[serde(default, deny_unknown_fields)]
+pub struct MeshConfig {
+    /// On. The first start creates the network, with the bridge at 0x0001.
+    pub enabled: bool,
 }
 
 /// The controller.

@@ -45,6 +45,7 @@ struct Bridge {
     beacon_ctx: beacon::Context,
     allow: Vec<Vec<u8>>,
     discovered: HashSet<(String, String)>,
+    mesh: Option<crate::mesh::BridgeMesh>,
 }
 
 /// Runs the bridge until a signal or a fatal error.
@@ -173,10 +174,35 @@ impl Bridge {
             beacon_ctx: ctx,
             allow,
             discovered: HashSet::new(),
+            mesh: None,
         })
     }
 
+    /// A scan configuration with Mesh's AD types always reported, when the
+    /// mesh is on: its retransmissions are identical, and must be heard.
+    fn scan_config(&self, mut c: ScanConfig) -> ScanConfig {
+        if self.config.mesh.enabled {
+            for t in crate::mesh::AD_TYPES {
+                if !c.always_report.contains(&t) {
+                    c.always_report.push(t);
+                }
+            }
+        }
+        c
+    }
+
     async fn setup(&mut self) {
+        if self.config.mesh.enabled {
+            match crate::mesh::BridgeMesh::start(
+                &self.host,
+                self.config.data.dir.join("mesh"),
+                self.mqtt.clone(),
+                self.base.clone(),
+            ) {
+                Ok(m) => self.mesh = Some(m),
+                Err(e) => tracing::error!("mesh: {e}"),
+            }
+        }
         for i in &self.config.irks {
             let (Ok(a), Ok(irk)) = (
                 i.address.parse::<Address>(),
@@ -202,7 +228,11 @@ impl Bridge {
             }
         }
         if self.config.scan.enabled {
-            if let Err(e) = self.host.start_scan(self.config.scan.config.clone()).await {
+            if let Err(e) = self
+                .host
+                .start_scan(self.scan_config(self.config.scan.config.clone()))
+                .await
+            {
                 tracing::error!("starting the scan: {e}");
             }
         }
@@ -326,6 +356,10 @@ impl Bridge {
     }
 
     async fn on_report(&mut self, r: &Report) {
+        if self.mesh.is_some() && crate::mesh::only_mesh(&r.data) {
+            // The mesh's own traffic, heard through its bearer; not a device.
+            return;
+        }
         let device = r.device();
         if r.rssi < self.config.scan.min_rssi
             || !(self.allowed(&r.address) || self.allowed(&device))
@@ -440,6 +474,34 @@ impl Bridge {
             }
         };
         let transaction = body.get("transaction").cloned().unwrap_or(Value::Null);
+        if let Some(mesh_op) = op.strip_prefix("mesh/") {
+            let Some(mesh) = self.mesh.clone() else {
+                self.respond(
+                    &op,
+                    &transaction,
+                    Err("the mesh is off ([mesh] enabled)".into()),
+                );
+                return;
+            };
+            let (mqtt, base, op, mesh_op) = (
+                self.mqtt.clone(),
+                self.base.clone(),
+                op.clone(),
+                mesh_op.to_string(),
+            );
+            tokio::spawn(async move {
+                let r = mesh.request(&mesh_op, &body).await;
+                respond(&mqtt, &base, &op, &transaction, r);
+            });
+            return;
+        }
+        // A scan started by request keeps hearing the mesh.
+        let mut body = body;
+        if op == "scan/start" {
+            if let Ok(c) = opt::<ScanConfig>(&body, "config") {
+                body["config"] = serde_json::to_value(self.scan_config(c)).unwrap_or(Value::Null);
+            }
+        }
         // Requests that wait on the radio run on their own so scanning keeps flowing.
         let host = self.host.clone();
         let mqtt = self.mqtt.clone();

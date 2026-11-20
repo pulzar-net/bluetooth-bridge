@@ -23,6 +23,8 @@ schema = ["dep:schemars", "bluetooth-host/schema"]
 schemars = { version = "1", optional = true, features = ["preserve_order"] }
 bluetooth-adv.workspace = true
 bluetooth-host.workspace = true
+bluetooth-mesh.workspace = true
+bluetooth-numbers.workspace = true
 hex.workspace = true
 lexopt = "0.3"
 rumqttc = { version = "0.25", default-features = false }

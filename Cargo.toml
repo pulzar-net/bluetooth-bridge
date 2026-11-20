@@ -21,6 +21,7 @@ authors = ["Pulzar LLC"]
 bluetooth-numbers = { path = "crates/bluetooth-numbers", version = "0.1.0" }
 bluetooth-adv = { path = "crates/bluetooth-adv", version = "0.1.0" }
 bluetooth-host = { path = "crates/bluetooth-host", version = "0.1.0" }
+bluetooth-mesh = { path = "crates/bluetooth-mesh", version = "0.1.0" }
 
 aes = "0.9"
 bt-hci = "0.11"

@@ -255,6 +255,8 @@ version = "0.1.0"
 dependencies = [
  "bluetooth-adv",
  "bluetooth-host",
+ "bluetooth-mesh",
+ "bluetooth-numbers",
  "hex",
  "lexopt",
  "rumqttc",

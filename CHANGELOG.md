@@ -26,6 +26,12 @@ Second milestone, in progress: Bluetooth Mesh.
     `ProxyServer` on a node, with proxy filters).
   - End to end in CI on two Bumble controllers: provisioning, configuration
     and control over advertising, and control through a proxy.
+- `bluetooth-bridge`: `[mesh] enabled` makes the bridge a mesh's provisioner
+  on its own controller; requests `mesh/network`, `mesh/unprovisioned`,
+  `mesh/provision`, `mesh/configure` and `mesh/onoff`, and events on
+  `<base>/mesh/event`.
+- `bluetooth-host`: `ScanConfig::always_report`, AD types reported every time
+  whatever the duplicate filter says (Mesh's retransmissions are identical).
 
 ### Fixed
 
