@@ -1,5 +1,4 @@
 #![doc = include_str!("../README.md")]
-
 #![no_std]
 
 include!(concat!(env!("OUT_DIR"), "/tables.rs"));
