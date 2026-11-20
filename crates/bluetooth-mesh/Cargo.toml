@@ -16,11 +16,18 @@ bluetooth-host.workspace = true
 aes.workspace = true
 ccm.workspace = true
 crc = "3"
+bluetooth-adv.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
+tracing.workspace = true
 cmac.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
-hex.workspace = true
+tempfile = "3"
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros", "rt-multi-thread"] }
 
 [lints]
 workspace = true

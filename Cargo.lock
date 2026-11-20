@@ -298,13 +298,19 @@ name = "bluetooth-mesh"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "bluetooth-adv",
  "bluetooth-host",
  "bluetooth-numbers",
  "ccm",
  "cmac",
  "crc",
  "hex",
+ "serde",
+ "serde_json",
+ "tempfile",
  "thiserror 2.0.21",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
