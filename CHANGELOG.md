@@ -27,6 +27,13 @@ Second milestone, in progress: Bluetooth Mesh.
   - End to end in CI on two Bumble controllers: provisioning, configuration
     and control over advertising, and control through a proxy.
 
+### Fixed
+
+- Home Assistant: each bridge on a broker is its own device, named for its
+  base topic (`bluetooth_bridge_<base>`); the default `bluetooth` keeps the
+  `bluetooth_bridge` id, so an existing installation keeps its device. Two
+  bridges used to share one.
+
 ## [0.1.0] - 2026-11-19
 
 First milestone: Bluetooth LE.

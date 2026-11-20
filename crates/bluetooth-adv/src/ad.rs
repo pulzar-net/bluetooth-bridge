@@ -491,9 +491,7 @@ impl Advertisement {
                 if d.is_empty() || !d.len().is_multiple_of(6) {
                     return false;
                 }
-                let list = d
-                    .chunks_exact(6)
-                    .filter_map(|c| <AddressBytes>::try_from(c).ok());
+                let list = d.as_chunks::<6>().0.iter().copied();
                 if s.ad_type == 0x17 {
                     self.public_target_addresses.extend(list);
                 } else {

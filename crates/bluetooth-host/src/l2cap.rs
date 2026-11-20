@@ -246,8 +246,10 @@ async fn on_signal(
                 u16_at(data, 6),
             );
             let scids: Vec<u16> = data[8..]
-                .chunks_exact(2)
-                .map(|c| u16::from_le_bytes([c[0], c[1]]))
+                .as_chunks::<2>()
+                .0
+                .iter()
+                .map(|c| u16::from_le_bytes(*c))
                 .collect();
             let (result, dcids, our_mtu) = accept(host, conn, spsm, &scids, mtu, mps, credits);
             let mut r = Vec::new();

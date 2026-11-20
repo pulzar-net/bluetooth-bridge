@@ -102,7 +102,7 @@ impl Client {
                 Err(e) => return Err(e),
             };
             let mut last = start;
-            for e in rsp[1..].chunks_exact(4) {
+            for e in rsp[1..].as_chunks::<4>().0 {
                 let (s, end) = (le16(e, 0)?, le16(e, 2)?);
                 out.push(Service {
                     uuid: service,

@@ -804,8 +804,8 @@ fn handle_locked(
         }
         op::READ_MULTIPLE_REQ | op::READ_MULTIPLE_VAR_REQ => {
             let mut out = vec![opcode + 1];
-            for c in pdu[1..].chunks_exact(2) {
-                let h = u16::from_le_bytes([c[0], c[1]]);
+            for c in pdu[1..].as_chunks::<2>().0 {
+                let h = u16::from_le_bytes(*c);
                 let a = db
                     .attrs
                     .iter()

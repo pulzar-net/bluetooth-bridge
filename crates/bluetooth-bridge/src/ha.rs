@@ -105,7 +105,7 @@ pub fn entity(
             "connections": [["bluetooth", device_id_to_mac(device_id)]],
             "name": device_name,
             "model": model,
-            "via_device": "bluetooth_bridge",
+            "via_device": bridge_id(base),
         },
     });
     if let Some(m) = manufacturer {
@@ -146,20 +146,43 @@ pub fn entity(
     )
 }
 
+/// The bridge's own device id in Home Assistant, from its base topic, which
+/// every bridge on one broker already has to have to itself: `bluetooth_bridge`
+/// for the default `bluetooth` (as before there could be more than one, so an
+/// existing installation keeps its device), `bluetooth_bridge_<base>` for any
+/// other.
+pub fn bridge_id(base: &str) -> String {
+    if base == "bluetooth" {
+        return "bluetooth_bridge".into();
+    }
+    let slug: String = base
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    format!("bluetooth_bridge_{slug}")
+}
+
 /// The bridge itself, as a device the sensors come through.
 pub fn bridge_device(prefix: &str, base: &str, version: &str) -> (String, Value) {
+    let id = bridge_id(base);
     (
-        format!("{prefix}/binary_sensor/bluetooth_bridge/connection_state/config"),
+        format!("{prefix}/binary_sensor/{id}/connection_state/config"),
         json!({
             "name": "connection state",
-            "unique_id": "bluetooth_bridge_connection_state",
+            "unique_id": format!("{id}_connection_state"),
             "state_topic": crate::mqtt::state_topic(base),
             "value_template": "{{ 'ON' if value_json.state == 'online' else 'OFF' }}",
             "device_class": "connectivity",
             "entity_category": "diagnostic",
             "device": {
-                "identifiers": ["bluetooth_bridge"],
-                "name": "Bluetooth bridge",
+                "identifiers": [id],
+                "name": if base == "bluetooth" { "Bluetooth bridge".to_string() } else { format!("Bluetooth bridge {base}") },
                 "model": "bluetooth-bridge",
                 "sw_version": version,
             },
@@ -179,6 +202,33 @@ fn device_id_to_mac(id: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn two_bridges_on_one_broker_are_two_devices() {
+        let (t1, c1) = bridge_device("homeassistant", "bluetooth", "0");
+        let (t2, c2) = bridge_device("homeassistant", "bluetooth/garage", "0");
+        assert_eq!(
+            t1, "homeassistant/binary_sensor/bluetooth_bridge/connection_state/config",
+            "the default bridge keeps its device"
+        );
+        assert_eq!(
+            t2,
+            "homeassistant/binary_sensor/bluetooth_bridge_bluetooth_garage/connection_state/config"
+        );
+        assert_ne!(c1["unique_id"], c2["unique_id"]);
+        assert_ne!(c1["device"]["identifiers"], c2["device"]["identifiers"]);
+        let (_, s) = entity(
+            "homeassistant",
+            "bluetooth/garage",
+            "BC5729000001",
+            "x",
+            "m",
+            None,
+            "temperature",
+            "°C",
+        );
+        assert_eq!(s["device"]["via_device"], c2["device"]["identifiers"][0]);
+    }
 
     #[test]
     fn sensors_and_binary_sensors() {
