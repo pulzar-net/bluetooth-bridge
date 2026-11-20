@@ -11,7 +11,7 @@ Second milestone, in progress: Bluetooth Mesh.
 ### Added
 
 - `bluetooth-numbers`: Mesh model opcodes and model identifiers.
-- `bluetooth-mesh`, new:
+- `bluetooth-mesh-stack`, new (named for crates.io, where `bluetooth-mesh` is taken):
   - The security toolbox (s1, k1 to k4) and network PDU encryption and
     obfuscation, checked against the specification's sample data.
   - Lower and upper transport: segmentation and reassembly, block
