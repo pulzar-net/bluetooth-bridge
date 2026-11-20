@@ -14,6 +14,7 @@ categories = ["network-programming", "hardware-support"]
 bluetooth-host.workspace = true
 aes.workspace = true
 ccm.workspace = true
+crc = "3"
 cmac.workspace = true
 thiserror.workspace = true
 
