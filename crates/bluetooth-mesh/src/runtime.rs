@@ -783,11 +783,26 @@ impl Mesh {
         network::encode_proxy(&net, iv, &pdu).ok()
     }
 
-    /// A Proxy Configuration message from the proxy, opened.
+    /// The primary network's Network ID (what a proxy advertises).
+    pub fn network_id(&self) -> Option<[u8; 8]> {
+        let s = lock(&self.inner.store);
+        (s.address != 0)
+            .then(|| s.net_keys.first().map(|(_, k)| crypto::k3(&k.0)))
+            .flatten()
+    }
+
+    /// A Network PDU opened with our keys, without taking it (no replay
+    /// cache, no delivery): for a proxy deciding where it goes.
+    pub fn open_network(&self, data: &[u8]) -> Option<NetworkPdu> {
+        let iv = lock(&self.inner.store).iv_index;
+        network::decode(&self.net_keys(), iv, data).map(|(_, _, p)| p)
+    }
+
+    /// A Proxy Configuration message from the proxy (or its client), opened.
     pub fn open_proxy_configuration(&self, data: &[u8]) -> Option<crate::proxy::Config> {
         let iv = lock(&self.inner.store).iv_index;
         let (_, _, pdu) = network::decode_proxy(&self.net_keys(), iv, data)?;
-        (pdu.ctl && pdu.dst == 0)
+        (pdu.ctl && pdu.ttl == 0 && pdu.dst == 0)
             .then(|| crate::proxy::Config::parse(&pdu.transport))
             .flatten()
     }

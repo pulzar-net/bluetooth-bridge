@@ -1,7 +1,7 @@
-//! The GATT bearer, client side: a mesh reached through a node's Mesh Proxy
-//! service rather than on the advertising channels. For a gateway whose
-//! radio is busy scanning, or a mesh whose nodes are out of advertising
-//! range but within one connection's.
+//! The GATT bearer: a mesh reached through a node's Mesh Proxy service
+//! rather than on the advertising channels. [`ProxyBearer`] is the client
+//! (a gateway whose radio is busy scanning, or a mesh out of advertising
+//! range but within one connection's); [`ProxyServer`] is a node's side.
 //!
 //! Proxy PDUs (SAR and type, [`crate::bearer::proxy_segments`] and
 //! [`crate::bearer::ProxyRx`]) go to Mesh Proxy Data In as writes without
@@ -9,10 +9,14 @@
 //! messages set which destinations the proxy forwards to us: on connecting,
 //! an empty reject list, so it forwards everything.
 
-use std::sync::{Arc, Mutex};
+use std::collections::{HashMap, HashSet};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use bluetooth_host::adv::Uuid;
-use bluetooth_host::{Address, ConnEvent, ConnectParams, Connection, Host};
+use bluetooth_host::gatt::server::{Access, CharacteristicDef, ServiceDef};
+use bluetooth_host::{
+    Address, AdvertisingParams, ConnEvent, ConnectParams, Connection, Host, HostEvent,
+};
 use tokio::sync::broadcast;
 
 use crate::bearer::{proxy, proxy_segments, ProxyRx};
@@ -119,6 +123,9 @@ pub enum Error {
     /// The peer has no Mesh Proxy service, or it lacks a characteristic.
     #[error("no Mesh Proxy service with Data In and Data Out")]
     NotAProxy,
+    /// A proxy needs a network: the node is not provisioned yet.
+    #[error("not provisioned")]
+    NotProvisioned,
 }
 
 /// A connection to a node's Mesh Proxy service, as a [`Bearer`].
@@ -251,6 +258,262 @@ impl Bearer for ProxyBearer {
             };
             if let Err(e) = self.write(kind, &data).await {
                 tracing::warn!("mesh proxy: {e}");
+            }
+        })
+    }
+}
+
+fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+/// A node's Mesh Proxy service, for one client at a time, as a [`Bearer`]:
+/// what the node sends goes to the client (when its filter lets the
+/// destination through) and to `relay` (the advertising bearer); what the
+/// client sends goes to the node and to `relay`, unchanged.
+///
+/// Not yet: forwarding to the client what the node only relays, and Node
+/// Identity advertising. A controller that has one advertising set (legacy
+/// advertising only) cannot advertise the service while a `relay` on the
+/// same host is sending.
+pub struct ProxyServer {
+    host: Host,
+    data_in: u16,
+    data_out: u16,
+    relay: Option<Arc<dyn Bearer>>,
+    mesh: OnceLock<Mesh>,
+    client: Mutex<Option<Client>>,
+    lock: tokio::sync::Mutex<()>,
+}
+
+struct Client {
+    conn: Connection,
+    filter: FilterType,
+    list: HashSet<u16>,
+}
+
+impl Client {
+    fn passes(&self, dst: u16) -> bool {
+        match self.filter {
+            FilterType::Accept => self.list.contains(&dst),
+            FilterType::Reject => !self.list.contains(&dst),
+        }
+    }
+}
+
+impl ProxyServer {
+    /// Adds the Mesh Proxy service to `host`'s GATT server. Open the node's
+    /// [`Mesh`] on the returned bearer, then [`ProxyServer::run`] it.
+    pub async fn new(host: Host, relay: Option<Arc<dyn Bearer>>) -> Result<Arc<Self>, Error> {
+        let def = ServiceDef {
+            uuid: Uuid::Uuid16(uuid::SERVICE),
+            primary: true,
+            characteristics: vec![
+                CharacteristicDef {
+                    uuid: Uuid::Uuid16(uuid::DATA_IN),
+                    properties: vec!["write_without_response".into()],
+                    read: Access::Never,
+                    write: Access::Open,
+                    value: Vec::new(),
+                    max_len: 66,
+                    description: None,
+                    descriptors: Vec::new(),
+                },
+                CharacteristicDef {
+                    uuid: Uuid::Uuid16(uuid::DATA_OUT),
+                    properties: vec!["notify".into()],
+                    read: Access::Never,
+                    write: Access::Never,
+                    value: Vec::new(),
+                    max_len: 66,
+                    description: None,
+                    descriptors: Vec::new(),
+                },
+            ],
+        };
+        let h = host.gatt_server().add(&def).await?;
+        Ok(Arc::new(ProxyServer {
+            data_in: h.characteristics[0].1,
+            data_out: h.characteristics[1].1,
+            host,
+            relay,
+            mesh: OnceLock::new(),
+            client: Mutex::new(None),
+            lock: tokio::sync::Mutex::new(()),
+        }))
+    }
+
+    /// Advertises the service, connectable, with the primary network's
+    /// Network ID. Returns the advertising set.
+    pub async fn advertise(&self, mesh: &Mesh) -> Result<u8, Error> {
+        let id = mesh.network_id().ok_or(Error::NotProvisioned)?;
+        let [lo, hi] = uuid::SERVICE.to_le_bytes();
+        // Flags (general discoverable, no BR/EDR), the service's UUID, and
+        // its Service Data: identification type 0 (Network ID) and the ID.
+        let mut ad = vec![
+            0x02, 0x01, 0x06, 0x03, 0x03, lo, hi, 0x0c, 0x16, lo, hi, 0x00,
+        ];
+        ad.extend_from_slice(&id);
+        let p = AdvertisingParams {
+            legacy: Some(true),
+            connectable: true,
+            scannable: true,
+            interval_min_ms: 100,
+            interval_max_ms: 150,
+            ..Default::default()
+        };
+        Ok(self.host.advertise(&p, &ad, &[]).await?)
+    }
+
+    /// Serves until the host stops: advertises while no client is
+    /// connected, and takes the client's Proxy PDUs.
+    pub async fn run(self: &Arc<Self>, mesh: Mesh) {
+        let _ = self.mesh.set(mesh.clone());
+        let mut events = self.host.events();
+        let mut rx: HashMap<u16, ProxyRx> = HashMap::new();
+        if let Err(e) = self.advertise(&mesh).await {
+            tracing::warn!("mesh proxy: advertising: {e}");
+        }
+        loop {
+            match events.recv().await {
+                Ok(HostEvent::Connected(conn)) => {
+                    let mut c = lock(&self.client);
+                    if c.is_none() {
+                        *c = Some(Client {
+                            conn,
+                            // A new client hears nothing until it says what.
+                            filter: FilterType::Accept,
+                            list: HashSet::new(),
+                        });
+                    }
+                }
+                Ok(HostEvent::Disconnected { handle, .. }) => {
+                    rx.remove(&handle);
+                    let gone = {
+                        let mut c = lock(&self.client);
+                        let ours = c.as_ref().is_some_and(|c| c.conn.handle() == handle);
+                        if ours {
+                            *c = None;
+                        }
+                        ours
+                    };
+                    if gone {
+                        if let Err(e) = self.advertise(&mesh).await {
+                            tracing::warn!("mesh proxy: advertising: {e}");
+                        }
+                    }
+                }
+                Ok(HostEvent::GattWrite {
+                    handle,
+                    attribute,
+                    value,
+                }) if attribute == self.data_in => {
+                    let ours = lock(&self.client)
+                        .as_ref()
+                        .is_some_and(|c| c.conn.handle() == handle);
+                    if !ours {
+                        continue;
+                    }
+                    if let Some((kind, msg)) = rx.entry(handle).or_default().add(&value) {
+                        self.client_sent(&mesh, kind, msg).await;
+                    }
+                }
+                Ok(HostEvent::Stopped(_)) | Err(broadcast::error::RecvError::Closed) => return,
+                _ => {}
+            }
+        }
+    }
+
+    async fn client_sent(&self, mesh: &Mesh, kind: u8, msg: Vec<u8>) {
+        match kind {
+            proxy::NETWORK => {
+                if let Some(pdu) = mesh.open_network(&msg) {
+                    if let Some(c) = lock(&self.client).as_mut() {
+                        // What a client sends from, it hears back.
+                        if c.filter == FilterType::Accept {
+                            c.list.insert(pdu.src);
+                        }
+                    }
+                }
+                mesh.receive(ad::MESSAGE, &msg);
+                if let Some(r) = &self.relay {
+                    r.send(ad::MESSAGE, msg).await;
+                }
+            }
+            proxy::BEACON => mesh.receive(ad::BEACON, &msg),
+            proxy::CONFIGURATION => {
+                let Some(cfg) = mesh.open_proxy_configuration(&msg) else {
+                    return;
+                };
+                let status = {
+                    let mut g = lock(&self.client);
+                    let Some(c) = g.as_mut() else { return };
+                    match cfg {
+                        Config::SetFilterType(f) => {
+                            c.filter = f;
+                            c.list.clear();
+                        }
+                        Config::Add(a) => c.list.extend(a),
+                        Config::Remove(a) => {
+                            for x in a {
+                                c.list.remove(&x);
+                            }
+                        }
+                        Config::Status { .. } => return,
+                    }
+                    Config::Status {
+                        filter: c.filter,
+                        list_size: u16::try_from(c.list.len()).unwrap_or(u16::MAX),
+                    }
+                };
+                if let Some(m) = mesh.proxy_configuration(&status) {
+                    self.to_client(proxy::CONFIGURATION, &m).await;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    async fn to_client(&self, kind: u8, msg: &[u8]) {
+        let Some(mtu) = lock(&self.client).as_ref().map(|c| c.conn.att_mtu()) else {
+            return;
+        };
+        let _one = self.lock.lock().await;
+        for p in proxy_segments(kind, msg, mtu) {
+            if let Err(e) = self.host.gatt_server().notify(self.data_out, &p).await {
+                tracing::debug!("mesh proxy: {e}");
+                return;
+            }
+        }
+    }
+}
+
+impl Bearer for ProxyServer {
+    fn send(&self, ad_type: u8, data: Vec<u8>) -> BoxFuture<'_, ()> {
+        Box::pin(async move {
+            let to_client = match ad_type {
+                ad::MESSAGE => self
+                    .mesh
+                    .get()
+                    .and_then(|m| m.open_network(&data))
+                    .is_some_and(|pdu| {
+                        lock(&self.client)
+                            .as_ref()
+                            .is_some_and(|c| c.passes(pdu.dst))
+                    }),
+                ad::BEACON => true,
+                _ => false,
+            };
+            if to_client {
+                let kind = if ad_type == ad::BEACON {
+                    proxy::BEACON
+                } else {
+                    proxy::NETWORK
+                };
+                self.to_client(kind, &data).await;
+            }
+            if let Some(r) = &self.relay {
+                r.send(ad_type, data).await;
             }
         })
     }
