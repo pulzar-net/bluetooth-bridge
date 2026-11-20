@@ -237,7 +237,7 @@ dependencies = [
 
 [[package]]
 name = "bluetooth-adv"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes",
  "bluetooth-numbers",
@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "bluetooth-bridge"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bluetooth-adv",
  "bluetooth-host",
@@ -274,7 +274,7 @@ dependencies = [
 
 [[package]]
 name = "bluetooth-host"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes",
  "bluetooth-adv",
@@ -299,7 +299,7 @@ dependencies = [
 
 [[package]]
 name = "bluetooth-mesh-stack"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes",
  "bluetooth-adv",
@@ -319,7 +319,7 @@ dependencies = [
 
 [[package]]
 name = "bluetooth-numbers"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "yaml-rust2 0.13.0",
 ]

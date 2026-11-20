@@ -4,9 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the crates
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-20
 
-Second milestone, in progress: Bluetooth Mesh.
+Bluetooth Mesh, the second milestone's first part, and the first release on
+crates.io.
 
 ### Added
 
@@ -63,5 +64,5 @@ First milestone: Bluetooth LE.
 - `bluetooth-bridge`: MQTT bridge with Home Assistant discovery and requests
   for scanning, connections, GATT, pairing, advertising and the GATT server.
 
-[Unreleased]: https://github.com/pulzar-net/bluetooth-bridge/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/pulzar-net/bluetooth-bridge/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pulzar-net/bluetooth-bridge/releases/tag/v0.1.0
