@@ -93,13 +93,30 @@ jobs:
           done
           (cd dist && sha256sum bluetooth-bridge-* > SHA256SUMS && cat SHA256SUMS)
 
-      - name: Release
+      - name: Release notes from the tag
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          notes="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
-          gh release create "${TAG}" dist/* --title "${TAG}" --notes "${notes}" --verify-tag
+          # The annotated tag's message (git tag -a vX.Y.Z --cleanup=whitespace
+          # -F notes.md), else GitHub's generated notes; never none.
+          set -euo pipefail
+          notes="${RUNNER_TEMP}/notes.md"
+          git fetch -q --force origin "refs/tags/${TAG}:refs/tags/${TAG}"
+          : > "${notes}"
+          if [ "$(git cat-file -t "refs/tags/${TAG}")" = tag ]; then
+            git cat-file tag "refs/tags/${TAG}" | sed '1,/^$/d; /^-----BEGIN [A-Z ]*SIGNATURE-----$/,$d' > "${notes}"
+          fi
+          if ! awk -v t="${TAG}" 'NF && $0 != t { f = 1 } END { exit !f }' "${notes}"; then
+            gh api "repos/${GITHUB_REPOSITORY}/releases/generate-notes" -f tag_name="${TAG}" -q .body > "${notes}"
+            awk 'NF && !/Full Changelog/ { f = 1 } END { exit !f }' "${notes}" || {
+              echo "::error::${TAG} has no release notes: tag it with git tag -a and the notes as its message"; exit 1; }
+          fi
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: gh release create "${TAG}" dist/* --title "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --verify-tag
 
   # The crates, after the binaries are out: each in dependency order, a
   # version crates.io already has skipped, so a release run again after a

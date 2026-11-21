@@ -27,7 +27,7 @@ cargo add bluetooth-host
 
 Every crate shares the workspace version and is released together. While
 the project is at 0.x, minor versions may break the API; the
-[changelog](/bluetooth-bridge/changelog.html) says what changed.
+[release notes](https://github.com/pulzar-net/bluetooth-bridge/releases) say what changed.
 
 ## Conventions shared by every crate
 

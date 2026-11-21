@@ -11,20 +11,20 @@ import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 	title="bluetooth-bridge"
 	tagline="A Bluetooth host stack that runs directly on HCI, with no BlueZ, and a Bluetooth LE to MQTT bridge. Sensors in Home Assistant, GATT and pairing over MQTT, in one static binary."
 	actions={[
-		{ text: 'Get started', link: '/bluetooth-bridge/getting-started.html', icon: 'right-arrow' },
+		{ text: 'Get started', link: '/bluetooth-bridge/getting-started.html' },
 		{ text: 'Sensors', link: '/bluetooth-bridge/sensors.html', variant: 'minimal' },
-		{ text: 'GitHub', link: 'https://github.com/pulzar-net/bluetooth-bridge', variant: 'minimal', icon: 'github' },
+		{ text: 'GitHub', link: 'https://github.com/pulzar-net/bluetooth-bridge', variant: 'minimal' },
 	]}
 />
 
 <Features
 	items={[
-		{ title: 'No BlueZ', body: 'The HCI user channel, H4 over UART or TCP. The same behavior on every board, whatever its kernel.', icon: 'setting', link: '/bluetooth-bridge/architecture.html' },
-		{ title: 'Sensors without pairing', body: 'BTHome (encrypted too), Ruuvi, KKM, iBeacon and Eddystone decoded into readings.', icon: 'star', link: '/bluetooth-bridge/sensors.html' },
-		{ title: 'Home Assistant', body: 'Every sensor with readings appears through MQTT discovery.', icon: 'puzzle', link: '/bluetooth-bridge/home-assistant.html' },
-		{ title: 'GATT and pairing over MQTT', body: 'Connect, read, write, subscribe, pair and bond; serve your own GATT services.', icon: 'random', link: '/bluetooth-bridge/connections.html' },
-		{ title: 'Bluetooth Mesh', body: 'The bridge provisions, configures and switches mesh nodes, over advertising or a GATT proxy.', icon: 'random', link: '/bluetooth-bridge/mqtt.html#bluetooth-mesh' },
-		{ title: 'Tested without hardware', body: 'Every role and pairing method runs against Bumble\'s virtual controllers in CI.', icon: 'laptop', link: '/bluetooth-bridge/testing.html' },
+		{ title: 'No BlueZ', body: 'The HCI user channel, H4 over UART or TCP. The same behavior on every board, whatever its kernel.', link: '/bluetooth-bridge/architecture.html' },
+		{ title: 'Sensors without pairing', body: 'BTHome (encrypted too), Ruuvi, KKM, iBeacon and Eddystone decoded into readings.', link: '/bluetooth-bridge/sensors.html' },
+		{ title: 'Home Assistant', body: 'Every sensor with readings appears through MQTT discovery.', link: '/bluetooth-bridge/home-assistant.html' },
+		{ title: 'GATT and pairing over MQTT', body: 'Connect, read, write, subscribe, pair and bond; serve your own GATT services.', link: '/bluetooth-bridge/connections.html' },
+		{ title: 'Bluetooth Mesh', body: 'The bridge provisions, configures and switches mesh nodes, over advertising or a GATT proxy.', link: '/bluetooth-bridge/mqtt.html#bluetooth-mesh' },
+		{ title: 'Tested without hardware', body: 'Every role and pairing method runs against Bumble\'s virtual controllers in CI.', link: '/bluetooth-bridge/testing.html' },
 	]}
 />
 

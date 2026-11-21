@@ -103,8 +103,8 @@ export default [
 		"label": "Project",
 		"items": [
 			{
-				"label": "Changelog",
-				"slug": "changelog"
+				"label": "Releases",
+				"link": "https://github.com/pulzar-net/bluetooth-bridge/releases"
 			}
 		]
 	}

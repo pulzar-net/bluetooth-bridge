@@ -29,7 +29,7 @@ directly, the same way on every board.
 **[Hardware](#supported-hardware)** |
 **[MQTT API](https://oss.pulzr.net/bluetooth-bridge/mqtt.html)** |
 **[Library](#use-it-as-a-library)** |
-**[Changelog](CHANGELOG.md)**
+**[Releases](https://github.com/pulzar-net/bluetooth-bridge/releases)**
 
 ## Status
 
