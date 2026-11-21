@@ -15,7 +15,7 @@ edition = "2021"
 rust-version = "1.89"
 license = "MIT"
 repository = "https://github.com/pulzar-net/bluetooth-bridge"
-homepage = "https://pulzar-net.github.io/bluetooth-bridge/"
+homepage = "https://oss.pulzr.net/bluetooth-bridge/"
 authors = ["Pulzar LLC"]
 
 [workspace.dependencies]

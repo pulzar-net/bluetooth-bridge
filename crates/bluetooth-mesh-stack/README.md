@@ -18,8 +18,8 @@ nodes, or runs as a node, over the advertising bearer or the GATT proxy.
 The API will change before it is released.
 
 Part of [bluetooth-bridge](https://github.com/pulzar-net/bluetooth-bridge), maintained by
-[Pulzar](https://pulzr.net). See the [user guide](https://pulzar-net.github.io/bluetooth-bridge/), the
-[library guide](https://pulzar-net.github.io/bluetooth-bridge/library/index.html) and the
-[API documentation](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_mesh_stack/index.html).
+[Pulzar](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
+[library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html) and the
+[API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_mesh_stack/index.html).
 
 License: MIT.

@@ -7,5 +7,5 @@ contact_links:
     url: https://github.com/pulzar-net/bluetooth-bridge/security/advisories/new
     about: Report it privately. Never open a public issue for a security problem.
   - name: Documentation
-    url: https://pulzar-net.github.io/bluetooth-bridge/
+    url: https://oss.pulzr.net/bluetooth-bridge/
     about: Installation, configuration, MQTT topics, hardware, troubleshooting and FAQ.

@@ -59,5 +59,5 @@ Out of scope: weaknesses of the Bluetooth specification itself, the MQTT
 broker you run, your Home Assistant installation, and deployments that
 deliberately turn off a documented protection.
 
-The [security model](https://pulzar-net.github.io/bluetooth-bridge/security.html)
+The [security model](https://oss.pulzr.net/bluetooth-bridge/security.html)
 describes what the project defends against and what it relies on you for.

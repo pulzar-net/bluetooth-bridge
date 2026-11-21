@@ -4,7 +4,7 @@ description: "Bluetooth LE advertising data and the beacon and sensor formats ca
 ---
 
 Bluetooth LE advertising data and the beacon and sensor formats carried in
-it. No I/O, no `unsafe`, never panics on any input. [crates.io](https://crates.io/crates/bluetooth-adv), [docs.rs](https://docs.rs/bluetooth-adv), [API docs for `main`](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_adv/index.html).
+it. No I/O, no `unsafe`, never panics on any input. [crates.io](https://crates.io/crates/bluetooth-adv), [docs.rs](https://docs.rs/bluetooth-adv), [API docs for `main`](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_adv/index.html).
 
 - `Advertisement::parse` parses advertising data (and `extend` adds a scan
   response) into every AD type, named and typed: flags, names, UUIDs,

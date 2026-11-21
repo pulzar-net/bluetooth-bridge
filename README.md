@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/pulzar-net/bluetooth-bridge)](https://github.com/pulzar-net/bluetooth-bridge/releases/latest)
 [![crates.io](https://img.shields.io/crates/v/bluetooth-host.svg)](https://crates.io/crates/bluetooth-host)
 [![docs.rs](https://img.shields.io/docsrs/bluetooth-host)](https://docs.rs/bluetooth-host)
-[![Docs](https://img.shields.io/badge/docs-pulzar--net.github.io-blue)](https://pulzar-net.github.io/bluetooth-bridge/)
+[![Docs](https://img.shields.io/badge/docs-oss.pulzr.net-blue)](https://oss.pulzr.net/bluetooth-bridge/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![MSRV](https://img.shields.io/badge/MSRV-1.89-blue)](Cargo.toml)
 
@@ -24,10 +24,10 @@ features and behavior depend on the kernel and BlueZ version of each board,
 and there was no complete Bluetooth LE host in Rust that runs on HCI
 directly, the same way on every board.
 
-**[Documentation](https://pulzar-net.github.io/bluetooth-bridge/)** |
+**[Documentation](https://oss.pulzr.net/bluetooth-bridge/)** |
 **[Quick start](#quick-start)** |
 **[Hardware](#supported-hardware)** |
-**[MQTT API](https://pulzar-net.github.io/bluetooth-bridge/mqtt.html)** |
+**[MQTT API](https://oss.pulzr.net/bluetooth-bridge/mqtt.html)** |
 **[Library](#use-it-as-a-library)** |
 **[Changelog](CHANGELOG.md)**
 
@@ -80,7 +80,7 @@ Sensors: BTHome v2 devices (Shelly BLU, and sensors with BTHome firmware such
 as the ATC/pvvx firmware for Xiaomi thermometers), Ruuvi tags, KKM beacons,
 iBeacon, AltBeacon and Eddystone beacons are decoded; any other advertiser
 is published with its parsed advertising data. The
-[hardware page](https://pulzar-net.github.io/bluetooth-bridge/hardware.html)
+[hardware page](https://oss.pulzr.net/bluetooth-bridge/hardware.html)
 has the details.
 
 ## Quick start
@@ -141,7 +141,7 @@ a BTHome or Ruuvi sensor appears within seconds, in Home Assistant under
 mosquitto_sub -h localhost -t 'bluetooth/device/#' -v
 ```
 
-No controller to spare? The [getting started guide](https://pulzar-net.github.io/bluetooth-bridge/getting-started.html)
+No controller to spare? The [getting started guide](https://oss.pulzr.net/bluetooth-bridge/getting-started.html)
 runs the same steps against Bumble's virtual controller. To run the bridge
 as a service, see [installation](#installation).
 
@@ -157,7 +157,7 @@ as a service, see [installation](#installation).
 - **systemd**: a hardened unit is in [`contrib/systemd/`](contrib/systemd/bluetooth-bridge.service).
 - **OpenWrt**: a procd init script is in [`contrib/openwrt/`](contrib/openwrt/bluetooth-bridge.init).
 
-The [installation guide](https://pulzar-net.github.io/bluetooth-bridge/installation.html)
+The [installation guide](https://oss.pulzr.net/bluetooth-bridge/installation.html)
 covers each one step by step.
 
 ## Configuration
@@ -178,7 +178,7 @@ default (`--config FILE` to change it):
 
 Unknown keys are an error, so a typo stops the bridge at startup. Every key,
 its type and default are in the
-[configuration reference](https://pulzar-net.github.io/bluetooth-bridge/config-reference.html),
+[configuration reference](https://oss.pulzr.net/bluetooth-bridge/config-reference.html),
 which is generated from the code. [`config.example.toml`](config.example.toml)
 shows them all. Log verbosity comes from `RUST_LOG` (default `info`).
 
@@ -199,7 +199,7 @@ device's identity address when its private address resolved.
 | `bluetooth/bridge/response/<op>` | out | `{"status":"ok","data":...}` or `{"status":"error","error":"..."}`, with the request's `transaction` |
 
 Keys never appear on MQTT; `bonds` lists who is bonded, not the keys. The
-[MQTT reference](https://pulzar-net.github.io/bluetooth-bridge/mqtt.html)
+[MQTT reference](https://oss.pulzr.net/bluetooth-bridge/mqtt.html)
 has every request and payload with examples.
 
 ## Use it as a library
@@ -222,7 +222,7 @@ cargo install bluetooth-bridge     # the bridge binary, built from source
 This example decodes a BTHome v2 temperature and humidity advertisement,
 the kind a sensor broadcasts, and prints `bt_home temperature: 25.06 °C` and
 `bt_home humidity: 50.55 %`. The host stack's own example (scan with a
-controller) is in the [library guide](https://pulzar-net.github.io/bluetooth-bridge/library/bluetooth-host.html).
+controller) is in the [library guide](https://oss.pulzr.net/bluetooth-bridge/library/bluetooth-host.html).
 
 ```rust
 use bluetooth_adv::beacon::{self, Context};
@@ -244,9 +244,9 @@ for b in beacon::decode(&adv, &Context::default()) {
 # assert_eq!((readings[1].key.as_str(), readings[1].value), ("humidity", 50.55));
 ```
 
-The [library guide](https://pulzar-net.github.io/bluetooth-bridge/library/index.html)
+The [library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html)
 covers each crate, including the host stack, and the
-[API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html)
+[API docs](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_host/index.html)
 cover every item.
 
 ## Architecture
@@ -271,7 +271,7 @@ cover every item.
 
 The controller runs the radio and the link layer. Everything above HCI runs
 in the host, with no BlueZ and no kernel Bluetooth stack in the path. The
-[architecture page](https://pulzar-net.github.io/bluetooth-bridge/architecture.html)
+[architecture page](https://oss.pulzr.net/bluetooth-bridge/architecture.html)
 explains the layers and the design rules (no `unsafe`, no panics on radio
 input, bounded memory).
 
@@ -304,7 +304,7 @@ a Rust library that behaves the same on every board.
 - **After that:** Classic BR/EDR (inquiry, Secure Simple Pairing, SDP,
   RFCOMM), then direction finding.
 
-The [roadmap page](https://pulzar-net.github.io/bluetooth-bridge/roadmap.html)
+The [roadmap page](https://oss.pulzr.net/bluetooth-bridge/roadmap.html)
 has the design for each. Questions go in [Discussions](https://github.com/pulzar-net/bluetooth-bridge/discussions); bugs and requests in [issues](https://github.com/pulzar-net/bluetooth-bridge/issues).
 
 ## Contributing
@@ -320,7 +320,7 @@ Please report vulnerabilities privately through
 [GitHub private vulnerability reporting](https://github.com/pulzar-net/bluetooth-bridge/security/advisories/new),
 never in a public issue. See [SECURITY.md](SECURITY.md) for what to include
 and how fast we respond, and the
-[security model](https://pulzar-net.github.io/bluetooth-bridge/security.html)
+[security model](https://oss.pulzr.net/bluetooth-bridge/security.html)
 for what the bridge protects.
 
 ## License

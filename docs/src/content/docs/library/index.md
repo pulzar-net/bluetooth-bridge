@@ -14,7 +14,7 @@ the thinnest layer on top; everything else can be used without it.
 | [bluetooth-mesh-stack](/bluetooth-bridge/library/bluetooth-mesh-stack.html) | Bluetooth Mesh | provision, configure and control mesh nodes |
 | [bluetooth-bridge](/bluetooth-bridge/library/bluetooth-bridge.html) | MQTT bridge | run or embed the bridge itself |
 
-The [API documentation](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html) covers every public
+The [API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_host/index.html) covers every public
 item.
 
 ## Depending on the crates

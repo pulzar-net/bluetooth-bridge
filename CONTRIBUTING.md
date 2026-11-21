@@ -19,7 +19,7 @@ through [private reporting](SECURITY.md), never a public issue.
   with the version, your configuration and a `RUST_LOG=debug` log.
 - **Larger changes** (a new profile, a change to the MQTT API or the
   configuration): open an issue first, so we can agree on the approach
-  before you write the code. The [roadmap](https://pulzar-net.github.io/bluetooth-bridge/roadmap.html)
+  before you write the code. The [roadmap](https://oss.pulzr.net/bluetooth-bridge/roadmap.html)
   has the design for the next milestones.
 
 ## Build
@@ -55,7 +55,7 @@ RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 ```
 
 Without `BUMBLE_PYTHON` the Bumble tests are skipped. See
-[Testing](https://pulzar-net.github.io/bluetooth-bridge/testing.html) for what
+[Testing](https://oss.pulzr.net/bluetooth-bridge/testing.html) for what
 each suite covers. To cover something Bumble's radio model cannot, add an
 HCI replay case to `crates/bluetooth-host/tests/replay.rs`.
 
@@ -73,7 +73,7 @@ UPDATE_DOCS=1 cargo test -p bluetooth-bridge --features schema --test config_ref
 cargo run -p bluetooth-bridge -- --config my-test.toml   # [adapter] transport = "tcp:127.0.0.1:9000"
 ```
 
-[Getting started](https://pulzar-net.github.io/bluetooth-bridge/getting-started.html)
+[Getting started](https://oss.pulzr.net/bluetooth-bridge/getting-started.html)
 walks through it with an MQTT broker.
 
 ## Fuzz

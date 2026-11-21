@@ -13,7 +13,7 @@ library crates for anyone building Bluetooth software in Rust.
 
 This site is the user guide and the reference. The
 [README](https://github.com/pulzar-net/bluetooth-bridge#readme) is the
-two-minute overview; the [API docs](https://pulzar-net.github.io/bluetooth-bridge/api/bluetooth_host/index.html)
+two-minute overview; the [API docs](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_host/index.html)
 cover every type and function.
 
 ## Where to start

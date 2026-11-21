@@ -12,7 +12,7 @@
 
 [Unit]
 Description=Bluetooth LE to MQTT bridge
-Documentation=https://pulzar-net.github.io/bluetooth-bridge/
+Documentation=https://oss.pulzr.net/bluetooth-bridge/
 After=network-online.target
 Wants=network-online.target
 Conflicts=bluetooth.service
