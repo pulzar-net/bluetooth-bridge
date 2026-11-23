@@ -56,6 +56,13 @@ codegen-units = 1
 strip = true
 panic = "abort"
 
+# The bridge crate is MQTT glue: its code is mostly serde for the MQTT API's
+# types (src/api.rs), generic code instantiated here, while the radio path
+# runs in bluetooth-host. Built for size, it keeps the static binary under
+# the gateways' budget (MAX_BINARY_SIZE in ci.yml).
+[profile.release.package.bluetooth-bridge]
+opt-level = "z"
+
 # The MQTT reference (crates/bluetooth-bridge/tests/asyncapi.rs, feature
 # unstable-asyncapi-docs) needs what no asyncapi-rust release has yet:
 # channel and operation messages (upstream main, mlilback/asyncapi-rust#17),
