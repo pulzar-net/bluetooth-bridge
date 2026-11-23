@@ -103,7 +103,8 @@ describes:
   UPDATE_DOCS=1 cargo test -p bluetooth-bridge --features unstable-asyncapi-docs --test asyncapi
   ```
 
-  A new request needs a request and a response type in `api.rs`, its arm in
+  A new request needs a request and a response type in `api.rs` (or one of
+  the shared shapes, such as `HandleRequest` and `DoneResponse`), its arm in
   `bridge.rs`, and its two channels and operations in the test.
 - The docs workflow runs that test and the AsyncAPI validator. The
   workspace pins the unpublished `pulzar-net/asyncapi-rust` fork with

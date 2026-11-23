@@ -457,13 +457,51 @@ macro_rules! request {
 #[cfg_attr(feature = "unstable-asyncapi-docs", derive(JsonSchema))]
 pub struct Done {}
 
-// Controller and scanning.
+// Shapes several requests and responses share: one type each, so the
+// bridge carries one serde implementation for all of them.
 
 request!(
-    /// Ask for the controller's address and capabilities, on
-    /// `bridge/request/info`.
-    InfoRequest, "Ask for the controller" {}
+    /// A request with no fields: `info`, `scan/stop`, `connections`,
+    /// `bonds`, `mesh/network`, `mesh/unprovisioned`. An empty payload is
+    /// the same as `{}`.
+    EmptyRequest, "A request with no fields" {}
 );
+
+request!(
+    /// A request on one connection: `disconnect`, `connection/rssi`,
+    /// `gatt/discover`, `pair`, `secure`.
+    HandleRequest, "A request on a connection" {
+        /// The connection handle.
+        handle: u16,
+    }
+);
+
+request!(
+    /// A request on one advertising set: `advertise/stop`, `periodic/stop`.
+    SetRequest, "A request on an advertising set" {
+        /// The set.
+        set: u8,
+    }
+);
+
+response!(
+    /// The response to a request that is done once the controller has it:
+    /// `scan/start`, `scan/stop`, `disconnect`, `connection/data_length`,
+    /// `gatt/write`, `gatt/subscribe`, `advertise/data`, `advertise/stop`,
+    /// `periodic/start`, `periodic/stop`, `periodic/terminate`.
+    DoneResponse,
+    Done,
+    "The request is done"
+);
+
+response!(
+    /// The response to `pair` and `secure`: the link's security.
+    SecurityResponse,
+    Security,
+    "The link's security"
+);
+
+// Controller and scanning.
 
 /// The result of `info`.
 #[derive(Debug, Clone, Serialize)]
@@ -496,25 +534,6 @@ request!(
     }
 );
 
-response!(
-    /// The response to `scan/start`.
-    ScanStartResponse,
-    Done,
-    "Scanning started"
-);
-
-request!(
-    /// Stop scanning, on `bridge/request/scan/stop`.
-    ScanStopRequest, "Stop scanning" {}
-);
-
-response!(
-    /// The response to `scan/stop`.
-    ScanStopResponse,
-    Done,
-    "Scanning stopped"
-);
-
 // Connections.
 
 request!(
@@ -543,26 +562,6 @@ response!(
     ConnectResponse,
     ConnectData,
     "The device is connected"
-);
-
-request!(
-    /// Close a connection, on `bridge/request/disconnect`.
-    DisconnectRequest, "Close a connection" {
-        /// The connection handle.
-        handle: u16,
-    }
-);
-
-response!(
-    /// The response to `disconnect`.
-    DisconnectResponse,
-    Done,
-    "The connection is closed"
-);
-
-request!(
-    /// List the open connections, on `bridge/request/connections`.
-    ConnectionsRequest, "List the connections" {}
 );
 
 /// An open connection.
@@ -655,22 +654,6 @@ request!(
     }
 );
 
-response!(
-    /// The response to `connection/data_length`.
-    ConnectionDataLengthResponse,
-    Done,
-    "The data length is asked for"
-);
-
-request!(
-    /// Read a connection's signal strength, on
-    /// `bridge/request/connection/rssi`.
-    ConnectionRssiRequest, "Read a connection's signal strength" {
-        /// The connection handle.
-        handle: u16,
-    }
-);
-
 /// The result of `connection/rssi`.
 #[derive(Debug, Clone, Copy, Serialize)]
 #[cfg_attr(feature = "unstable-asyncapi-docs", derive(JsonSchema))]
@@ -711,15 +694,6 @@ response!(
     GattMtuResponse,
     MtuData,
     "The ATT MTU now in use"
-);
-
-request!(
-    /// Discover a peer's services, characteristics and descriptors, on
-    /// `bridge/request/gatt/discover`.
-    GattDiscoverRequest, "Discover a peer's GATT database" {
-        /// The connection handle.
-        handle: u16,
-    }
 );
 
 response!(
@@ -771,13 +745,6 @@ request!(
     }
 );
 
-response!(
-    /// The response to `gatt/write`.
-    GattWriteResponse,
-    Done,
-    "The attribute is written"
-);
-
 request!(
     /// Turn a peer characteristic's notifications or indications on or off,
     /// on `bridge/request/gatt/subscribe`. They arrive as `notification`
@@ -796,45 +763,7 @@ request!(
     }
 );
 
-response!(
-    /// The response to `gatt/subscribe`.
-    GattSubscribeResponse,
-    Done,
-    "The subscription is set"
-);
-
 // Security.
-
-request!(
-    /// Pair with the peer, on `bridge/request/pair`.
-    PairRequest, "Pair with a peer" {
-        /// The connection handle.
-        handle: u16,
-    }
-);
-
-response!(
-    /// The response to `pair`.
-    PairResponse,
-    Security,
-    "The link's security after pairing"
-);
-
-request!(
-    /// Encrypt the link with a stored key, pairing when there is none, on
-    /// `bridge/request/secure`.
-    SecureRequest, "Encrypt a link" {
-        /// The connection handle.
-        handle: u16,
-    }
-);
-
-response!(
-    /// The response to `secure`.
-    SecureResponse,
-    Security,
-    "The link's security"
-);
 
 request!(
     /// Forget a bond, on `bridge/request/unpair`.
@@ -857,11 +786,6 @@ response!(
     UnpairResponse,
     UnpairData,
     "The bond is forgotten"
-);
-
-request!(
-    /// List the stored bonds, on `bridge/request/bonds`.
-    BondsRequest, "List the bonds" {}
 );
 
 /// A stored bond: who, and what kind of keys, never the keys.
@@ -936,28 +860,6 @@ request!(
     }
 );
 
-response!(
-    /// The response to `advertise/data`.
-    AdvertiseDataResponse,
-    Done,
-    "The set's data changed"
-);
-
-request!(
-    /// Stop an advertising set, on `bridge/request/advertise/stop`.
-    AdvertiseStopRequest, "Stop advertising" {
-        /// The set.
-        set: u8,
-    }
-);
-
-response!(
-    /// The response to `advertise/stop`.
-    AdvertiseStopResponse,
-    Done,
-    "The set stopped"
-);
-
 request!(
     /// Start periodic advertising on an extended set, on
     /// `bridge/request/periodic/start`.
@@ -971,28 +873,6 @@ request!(
         #[serde(default)]
         data: String,
     }
-);
-
-response!(
-    /// The response to `periodic/start`.
-    PeriodicStartResponse,
-    Done,
-    "Periodic advertising started"
-);
-
-request!(
-    /// Stop a set's periodic advertising, on `bridge/request/periodic/stop`.
-    PeriodicStopRequest, "Stop periodic advertising" {
-        /// The set.
-        set: u8,
-    }
-);
-
-response!(
-    /// The response to `periodic/stop`.
-    PeriodicStopResponse,
-    Done,
-    "Periodic advertising stopped"
 );
 
 request!(
@@ -1036,13 +916,6 @@ request!(
         /// The sync handle.
         sync: u16,
     }
-);
-
-response!(
-    /// The response to `periodic/terminate`.
-    PeriodicTerminateResponse,
-    Done,
-    "The train is no longer followed"
 );
 
 // GATT server.
@@ -1120,11 +993,6 @@ response!(
 
 // Mesh.
 
-request!(
-    /// Show the mesh network, on `bridge/request/mesh/network`.
-    MeshNetworkRequest, "Show the mesh network" {}
-);
-
 /// A node the bridge provisioned.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "unstable-asyncapi-docs", derive(JsonSchema))]
@@ -1154,12 +1022,6 @@ response!(
     MeshNetworkResponse,
     MeshNetworkData,
     "The mesh network"
-);
-
-request!(
-    /// List the unprovisioned devices heard, newest first, on
-    /// `bridge/request/mesh/unprovisioned`.
-    MeshUnprovisionedRequest, "List unprovisioned devices" {}
 );
 
 /// An unprovisioned device whose beacon was heard.

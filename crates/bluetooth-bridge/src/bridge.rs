@@ -569,7 +569,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
     let e = |x: bluetooth_host::Error| x.to_string();
     match op {
         "info" => {
-            answer::<InfoRequest, InfoResponse>(body, async |_| {
+            answer::<EmptyRequest, InfoResponse>(body, async |_| {
                 let c = host.capabilities();
                 Ok(InfoData {
                     address: host.address(),
@@ -580,7 +580,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "scan/start" => {
-            answer::<ScanStartRequest, ScanStartResponse>(body, async |q| {
+            answer::<ScanStartRequest, DoneResponse>(body, async |q| {
                 let mut c = q.config.unwrap_or_default();
                 for t in always_report {
                     if !c.always_report.contains(t) {
@@ -593,7 +593,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "scan/stop" => {
-            answer::<ScanStopRequest, ScanStopResponse>(body, async |_| {
+            answer::<EmptyRequest, DoneResponse>(body, async |_| {
                 host.stop_scan().await.map_err(e)?;
                 Ok(Done {})
             })
@@ -613,14 +613,14 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "disconnect" => {
-            answer::<DisconnectRequest, DisconnectResponse>(body, async |q| {
+            answer::<HandleRequest, DoneResponse>(body, async |q| {
                 conn(host, q.handle)?.disconnect().await.map_err(e)?;
                 Ok(Done {})
             })
             .await
         }
         "connections" => {
-            answer::<ConnectionsRequest, ConnectionsResponse>(body, async |_| {
+            answer::<EmptyRequest, ConnectionsResponse>(body, async |_| {
                 Ok(host
                     .connections()
                     .iter()
@@ -657,7 +657,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "connection/data_length" => {
-            answer::<ConnectionDataLengthRequest, ConnectionDataLengthResponse>(body, async |q| {
+            answer::<ConnectionDataLengthRequest, DoneResponse>(body, async |q| {
                 conn(host, q.handle)?
                     .set_data_length(q.tx_octets, q.tx_time)
                     .await
@@ -667,7 +667,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "connection/rssi" => {
-            answer::<ConnectionRssiRequest, ConnectionRssiResponse>(body, async |q| {
+            answer::<HandleRequest, ConnectionRssiResponse>(body, async |q| {
                 Ok(RssiData {
                     rssi: conn(host, q.handle)?.read_rssi().await.map_err(e)?,
                 })
@@ -687,7 +687,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "gatt/discover" => {
-            answer::<GattDiscoverRequest, GattDiscoverResponse>(body, async |q| {
+            answer::<HandleRequest, GattDiscoverResponse>(body, async |q| {
                 conn(host, q.handle)?.gatt().discover().await.map_err(e)
             })
             .await
@@ -706,7 +706,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "gatt/write" => {
-            answer::<GattWriteRequest, GattWriteResponse>(body, async |q| {
+            answer::<GattWriteRequest, DoneResponse>(body, async |q| {
                 let v = unhex("value", &q.value)?;
                 let g = conn(host, q.handle)?.gatt();
                 if q.without_response {
@@ -719,7 +719,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "gatt/subscribe" => {
-            answer::<GattSubscribeRequest, GattSubscribeResponse>(body, async |q| {
+            answer::<GattSubscribeRequest, DoneResponse>(body, async |q| {
                 let g = conn(host, q.handle)?.gatt();
                 let c = g.characteristic_at(q.attribute).await.map_err(e)?;
                 g.subscribe(&c, q.notify, q.indicate).await.map_err(e)?;
@@ -728,13 +728,13 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "pair" => {
-            answer::<PairRequest, PairResponse>(body, async |q| {
+            answer::<HandleRequest, SecurityResponse>(body, async |q| {
                 conn(host, q.handle)?.pair().await.map_err(e)
             })
             .await
         }
         "secure" => {
-            answer::<SecureRequest, SecureResponse>(body, async |q| {
+            answer::<HandleRequest, SecurityResponse>(body, async |q| {
                 conn(host, q.handle)?.secure().await.map_err(e)
             })
             .await
@@ -748,7 +748,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "bonds" => {
-            answer::<BondsRequest, BondsResponse>(body, async |_| {
+            answer::<EmptyRequest, BondsResponse>(body, async |_| {
                 Ok(host
                     .keys()
                     .bonds()
@@ -781,7 +781,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "advertise/data" => {
-            answer::<AdvertiseDataRequest, AdvertiseDataResponse>(body, async |q| {
+            answer::<AdvertiseDataRequest, DoneResponse>(body, async |q| {
                 let sr = q
                     .scan_response
                     .as_deref()
@@ -795,14 +795,14 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "advertise/stop" => {
-            answer::<AdvertiseStopRequest, AdvertiseStopResponse>(body, async |q| {
+            answer::<SetRequest, DoneResponse>(body, async |q| {
                 host.stop_advertising(q.set).await.map_err(e)?;
                 Ok(Done {})
             })
             .await
         }
         "periodic/start" => {
-            answer::<PeriodicStartRequest, PeriodicStartResponse>(body, async |q| {
+            answer::<PeriodicStartRequest, DoneResponse>(body, async |q| {
                 host.start_periodic(
                     q.set,
                     &q.params.unwrap_or_default(),
@@ -815,7 +815,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "periodic/stop" => {
-            answer::<PeriodicStopRequest, PeriodicStopResponse>(body, async |q| {
+            answer::<SetRequest, DoneResponse>(body, async |q| {
                 host.stop_periodic(q.set).await.map_err(e)?;
                 Ok(Done {})
             })
@@ -832,7 +832,7 @@ pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -
             .await
         }
         "periodic/terminate" => {
-            answer::<PeriodicTerminateRequest, PeriodicTerminateResponse>(body, async |q| {
+            answer::<PeriodicTerminateRequest, DoneResponse>(body, async |q| {
                 host.terminate_sync(q.sync).await.map_err(e)?;
                 Ok(Done {})
             })

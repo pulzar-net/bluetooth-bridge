@@ -107,7 +107,7 @@ impl BridgeMesh {
     pub async fn request(&self, op: &str, body: &Json) -> Vec<u8> {
         match op {
             "network" => {
-                answer::<MeshNetworkRequest, MeshNetworkResponse>(body, async |_| {
+                answer::<EmptyRequest, MeshNetworkResponse>(body, async |_| {
                     let s = self.mesh.store();
                     Ok(MeshNetworkData {
                         address: s.address,
@@ -118,7 +118,7 @@ impl BridgeMesh {
                 .await
             }
             "unprovisioned" => {
-                answer::<MeshUnprovisionedRequest, MeshUnprovisionedResponse>(body, async |_| {
+                answer::<EmptyRequest, MeshUnprovisionedResponse>(body, async |_| {
                     let mut v: Vec<_> = lock(&self.heard)
                         .iter()
                         .map(|(u, (oob, at))| UnprovisionedDevice {

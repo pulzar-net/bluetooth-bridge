@@ -138,8 +138,8 @@
       "address": "bluetooth/bridge/request/info",
       "description": "The controller's address and capabilities.",
       "messages": {
-        "InfoRequest": {
-          "$ref": "#/components/messages/InfoRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -168,8 +168,8 @@
       "address": "bluetooth/bridge/response/scan/start",
       "description": "The answer to `scan/start`.",
       "messages": {
-        "ScanStartResponse": {
-          "$ref": "#/components/messages/ScanStartResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -180,8 +180,8 @@
       "address": "bluetooth/bridge/request/scan/stop",
       "description": "Stop scanning.",
       "messages": {
-        "ScanStopRequest": {
-          "$ref": "#/components/messages/ScanStopRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -189,8 +189,8 @@
       "address": "bluetooth/bridge/response/scan/stop",
       "description": "The answer to `scan/stop`.",
       "messages": {
-        "ScanStopResponse": {
-          "$ref": "#/components/messages/ScanStopResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -222,8 +222,8 @@
       "address": "bluetooth/bridge/request/disconnect",
       "description": "Close a connection.",
       "messages": {
-        "DisconnectRequest": {
-          "$ref": "#/components/messages/DisconnectRequest"
+        "HandleRequest": {
+          "$ref": "#/components/messages/HandleRequest"
         }
       }
     },
@@ -231,8 +231,8 @@
       "address": "bluetooth/bridge/response/disconnect",
       "description": "The answer to `disconnect`.",
       "messages": {
-        "DisconnectResponse": {
-          "$ref": "#/components/messages/DisconnectResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -243,8 +243,8 @@
       "address": "bluetooth/bridge/request/connections",
       "description": "The open connections.",
       "messages": {
-        "ConnectionsRequest": {
-          "$ref": "#/components/messages/ConnectionsRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -315,8 +315,8 @@
       "address": "bluetooth/bridge/response/connection/data_length",
       "description": "The answer to `connection/data_length`.",
       "messages": {
-        "ConnectionDataLengthResponse": {
-          "$ref": "#/components/messages/ConnectionDataLengthResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -327,8 +327,8 @@
       "address": "bluetooth/bridge/request/connection/rssi",
       "description": "Read a connection's signal strength.",
       "messages": {
-        "ConnectionRssiRequest": {
-          "$ref": "#/components/messages/ConnectionRssiRequest"
+        "HandleRequest": {
+          "$ref": "#/components/messages/HandleRequest"
         }
       }
     },
@@ -369,8 +369,8 @@
       "address": "bluetooth/bridge/request/gatt/discover",
       "description": "Discover a peer's services, characteristics and descriptors.",
       "messages": {
-        "GattDiscoverRequest": {
-          "$ref": "#/components/messages/GattDiscoverRequest"
+        "HandleRequest": {
+          "$ref": "#/components/messages/HandleRequest"
         }
       }
     },
@@ -420,8 +420,8 @@
       "address": "bluetooth/bridge/response/gatt/write",
       "description": "The answer to `gatt/write`.",
       "messages": {
-        "GattWriteResponse": {
-          "$ref": "#/components/messages/GattWriteResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -441,8 +441,8 @@
       "address": "bluetooth/bridge/response/gatt/subscribe",
       "description": "The answer to `gatt/subscribe`.",
       "messages": {
-        "GattSubscribeResponse": {
-          "$ref": "#/components/messages/GattSubscribeResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -453,8 +453,8 @@
       "address": "bluetooth/bridge/request/pair",
       "description": "Pair with a connected peer.",
       "messages": {
-        "PairRequest": {
-          "$ref": "#/components/messages/PairRequest"
+        "HandleRequest": {
+          "$ref": "#/components/messages/HandleRequest"
         }
       }
     },
@@ -462,8 +462,8 @@
       "address": "bluetooth/bridge/response/pair",
       "description": "The answer to `pair`.",
       "messages": {
-        "PairResponse": {
-          "$ref": "#/components/messages/PairResponse"
+        "SecurityResponse": {
+          "$ref": "#/components/messages/SecurityResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -474,8 +474,8 @@
       "address": "bluetooth/bridge/request/secure",
       "description": "Encrypt a link with a stored key, pairing when there is none.",
       "messages": {
-        "SecureRequest": {
-          "$ref": "#/components/messages/SecureRequest"
+        "HandleRequest": {
+          "$ref": "#/components/messages/HandleRequest"
         }
       }
     },
@@ -483,8 +483,8 @@
       "address": "bluetooth/bridge/response/secure",
       "description": "The answer to `secure`.",
       "messages": {
-        "SecureResponse": {
-          "$ref": "#/components/messages/SecureResponse"
+        "SecurityResponse": {
+          "$ref": "#/components/messages/SecurityResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -516,8 +516,8 @@
       "address": "bluetooth/bridge/request/bonds",
       "description": "The stored bonds: who, and what kind of keys. Keys are never published.",
       "messages": {
-        "BondsRequest": {
-          "$ref": "#/components/messages/BondsRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -567,8 +567,8 @@
       "address": "bluetooth/bridge/response/advertise/data",
       "description": "The answer to `advertise/data`.",
       "messages": {
-        "AdvertiseDataResponse": {
-          "$ref": "#/components/messages/AdvertiseDataResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -579,8 +579,8 @@
       "address": "bluetooth/bridge/request/advertise/stop",
       "description": "Stop an advertising set.",
       "messages": {
-        "AdvertiseStopRequest": {
-          "$ref": "#/components/messages/AdvertiseStopRequest"
+        "SetRequest": {
+          "$ref": "#/components/messages/SetRequest"
         }
       }
     },
@@ -588,8 +588,8 @@
       "address": "bluetooth/bridge/response/advertise/stop",
       "description": "The answer to `advertise/stop`.",
       "messages": {
-        "AdvertiseStopResponse": {
-          "$ref": "#/components/messages/AdvertiseStopResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -609,8 +609,8 @@
       "address": "bluetooth/bridge/response/periodic/start",
       "description": "The answer to `periodic/start`.",
       "messages": {
-        "PeriodicStartResponse": {
-          "$ref": "#/components/messages/PeriodicStartResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -621,8 +621,8 @@
       "address": "bluetooth/bridge/request/periodic/stop",
       "description": "Stop a set's periodic advertising.",
       "messages": {
-        "PeriodicStopRequest": {
-          "$ref": "#/components/messages/PeriodicStopRequest"
+        "SetRequest": {
+          "$ref": "#/components/messages/SetRequest"
         }
       }
     },
@@ -630,8 +630,8 @@
       "address": "bluetooth/bridge/response/periodic/stop",
       "description": "The answer to `periodic/stop`.",
       "messages": {
-        "PeriodicStopResponse": {
-          "$ref": "#/components/messages/PeriodicStopResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -672,8 +672,8 @@
       "address": "bluetooth/bridge/response/periodic/terminate",
       "description": "The answer to `periodic/terminate`.",
       "messages": {
-        "PeriodicTerminateResponse": {
-          "$ref": "#/components/messages/PeriodicTerminateResponse"
+        "DoneResponse": {
+          "$ref": "#/components/messages/DoneResponse"
         },
         "ErrorResponse": {
           "$ref": "#/components/messages/ErrorResponse"
@@ -747,8 +747,8 @@
       "address": "bluetooth/bridge/request/mesh/network",
       "description": "The mesh network: the bridge's address, the IV index and the nodes it provisioned. Mesh requests need `mesh.enabled`.",
       "messages": {
-        "MeshNetworkRequest": {
-          "$ref": "#/components/messages/MeshNetworkRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -768,8 +768,8 @@
       "address": "bluetooth/bridge/request/mesh/unprovisioned",
       "description": "The unprovisioned devices whose beacons were heard, newest first.",
       "messages": {
-        "MeshUnprovisionedRequest": {
-          "$ref": "#/components/messages/MeshUnprovisionedRequest"
+        "EmptyRequest": {
+          "$ref": "#/components/messages/EmptyRequest"
         }
       }
     },
@@ -1087,7 +1087,7 @@
       "description": "Answered on `bluetooth/bridge/response/info`.",
       "messages": [
         {
-          "$ref": "#/channels/infoRequest/messages/InfoRequest"
+          "$ref": "#/channels/infoRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -1145,7 +1145,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/scanStartResponse/messages/ScanStartResponse"
+          "$ref": "#/channels/scanStartResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/scanStartResponse/messages/ErrorResponse"
@@ -1167,7 +1167,7 @@
       "description": "Answered on `bluetooth/bridge/response/scan/stop`.",
       "messages": [
         {
-          "$ref": "#/channels/scanStopRequest/messages/ScanStopRequest"
+          "$ref": "#/channels/scanStopRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -1185,7 +1185,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/scanStopResponse/messages/ScanStopResponse"
+          "$ref": "#/channels/scanStopResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/scanStopResponse/messages/ErrorResponse"
@@ -1247,7 +1247,7 @@
       "description": "Answered on `bluetooth/bridge/response/disconnect`.",
       "messages": [
         {
-          "$ref": "#/channels/disconnectRequest/messages/DisconnectRequest"
+          "$ref": "#/channels/disconnectRequest/messages/HandleRequest"
         }
       ],
       "bindings": {
@@ -1265,7 +1265,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/disconnectResponse/messages/DisconnectResponse"
+          "$ref": "#/channels/disconnectResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/disconnectResponse/messages/ErrorResponse"
@@ -1287,7 +1287,7 @@
       "description": "Answered on `bluetooth/bridge/response/connections`.",
       "messages": [
         {
-          "$ref": "#/channels/connectionsRequest/messages/ConnectionsRequest"
+          "$ref": "#/channels/connectionsRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -1425,7 +1425,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/connectionDataLengthResponse/messages/ConnectionDataLengthResponse"
+          "$ref": "#/channels/connectionDataLengthResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/connectionDataLengthResponse/messages/ErrorResponse"
@@ -1447,7 +1447,7 @@
       "description": "Answered on `bluetooth/bridge/response/connection/rssi`.",
       "messages": [
         {
-          "$ref": "#/channels/connectionRssiRequest/messages/ConnectionRssiRequest"
+          "$ref": "#/channels/connectionRssiRequest/messages/HandleRequest"
         }
       ],
       "bindings": {
@@ -1527,7 +1527,7 @@
       "description": "Answered on `bluetooth/bridge/response/gatt/discover`.",
       "messages": [
         {
-          "$ref": "#/channels/gattDiscoverRequest/messages/GattDiscoverRequest"
+          "$ref": "#/channels/gattDiscoverRequest/messages/HandleRequest"
         }
       ],
       "bindings": {
@@ -1625,7 +1625,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/gattWriteResponse/messages/GattWriteResponse"
+          "$ref": "#/channels/gattWriteResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/gattWriteResponse/messages/ErrorResponse"
@@ -1665,7 +1665,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/gattSubscribeResponse/messages/GattSubscribeResponse"
+          "$ref": "#/channels/gattSubscribeResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/gattSubscribeResponse/messages/ErrorResponse"
@@ -1687,7 +1687,7 @@
       "description": "Answered on `bluetooth/bridge/response/pair`.",
       "messages": [
         {
-          "$ref": "#/channels/pairRequest/messages/PairRequest"
+          "$ref": "#/channels/pairRequest/messages/HandleRequest"
         }
       ],
       "bindings": {
@@ -1705,7 +1705,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/pairResponse/messages/PairResponse"
+          "$ref": "#/channels/pairResponse/messages/SecurityResponse"
         },
         {
           "$ref": "#/channels/pairResponse/messages/ErrorResponse"
@@ -1727,7 +1727,7 @@
       "description": "Answered on `bluetooth/bridge/response/secure`.",
       "messages": [
         {
-          "$ref": "#/channels/secureRequest/messages/SecureRequest"
+          "$ref": "#/channels/secureRequest/messages/HandleRequest"
         }
       ],
       "bindings": {
@@ -1745,7 +1745,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/secureResponse/messages/SecureResponse"
+          "$ref": "#/channels/secureResponse/messages/SecurityResponse"
         },
         {
           "$ref": "#/channels/secureResponse/messages/ErrorResponse"
@@ -1807,7 +1807,7 @@
       "description": "Answered on `bluetooth/bridge/response/bonds`.",
       "messages": [
         {
-          "$ref": "#/channels/bondsRequest/messages/BondsRequest"
+          "$ref": "#/channels/bondsRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -1905,7 +1905,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/advertiseDataResponse/messages/AdvertiseDataResponse"
+          "$ref": "#/channels/advertiseDataResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/advertiseDataResponse/messages/ErrorResponse"
@@ -1927,7 +1927,7 @@
       "description": "Answered on `bluetooth/bridge/response/advertise/stop`.",
       "messages": [
         {
-          "$ref": "#/channels/advertiseStopRequest/messages/AdvertiseStopRequest"
+          "$ref": "#/channels/advertiseStopRequest/messages/SetRequest"
         }
       ],
       "bindings": {
@@ -1945,7 +1945,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/advertiseStopResponse/messages/AdvertiseStopResponse"
+          "$ref": "#/channels/advertiseStopResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/advertiseStopResponse/messages/ErrorResponse"
@@ -1985,7 +1985,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/periodicStartResponse/messages/PeriodicStartResponse"
+          "$ref": "#/channels/periodicStartResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/periodicStartResponse/messages/ErrorResponse"
@@ -2007,7 +2007,7 @@
       "description": "Answered on `bluetooth/bridge/response/periodic/stop`.",
       "messages": [
         {
-          "$ref": "#/channels/periodicStopRequest/messages/PeriodicStopRequest"
+          "$ref": "#/channels/periodicStopRequest/messages/SetRequest"
         }
       ],
       "bindings": {
@@ -2025,7 +2025,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/periodicStopResponse/messages/PeriodicStopResponse"
+          "$ref": "#/channels/periodicStopResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/periodicStopResponse/messages/ErrorResponse"
@@ -2105,7 +2105,7 @@
       "description": "The result, or the error when the request could not be read or done.",
       "messages": [
         {
-          "$ref": "#/channels/periodicTerminateResponse/messages/PeriodicTerminateResponse"
+          "$ref": "#/channels/periodicTerminateResponse/messages/DoneResponse"
         },
         {
           "$ref": "#/channels/periodicTerminateResponse/messages/ErrorResponse"
@@ -2247,7 +2247,7 @@
       "description": "Answered on `bluetooth/bridge/response/mesh/network`.",
       "messages": [
         {
-          "$ref": "#/channels/meshNetworkRequest/messages/MeshNetworkRequest"
+          "$ref": "#/channels/meshNetworkRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -2287,7 +2287,7 @@
       "description": "Answered on `bluetooth/bridge/response/mesh/unprovisioned`.",
       "messages": [
         {
-          "$ref": "#/channels/meshUnprovisionedRequest/messages/MeshUnprovisionedRequest"
+          "$ref": "#/channels/meshUnprovisionedRequest/messages/EmptyRequest"
         }
       ],
       "bindings": {
@@ -3336,10 +3336,10 @@
           "$ref": "#/components/schemas/HomeAssistantState"
         }
       },
-      "InfoRequest": {
-        "name": "InfoRequest",
-        "title": "InfoRequest",
-        "summary": "Ask for the controller",
+      "EmptyRequest": {
+        "name": "EmptyRequest",
+        "title": "EmptyRequest",
+        "summary": "A request with no fields",
         "contentType": "application/json",
         "payload": {
           "type": "object",
@@ -3348,8 +3348,8 @@
               "description": "Any value; the response echoes it, so a client can match the\ntwo."
             }
           },
-          "description": "Ask for the controller's address and capabilities, on\n`bridge/request/info`.",
-          "title": "InfoRequest",
+          "description": "A request with no fields: `info`, `scan/stop`, `connections`,\n`bonds`, `mesh/network`, `mesh/unprovisioned`. An empty payload is\nthe same as `{}`.",
+          "title": "EmptyRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -3451,10 +3451,10 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "ScanStartResponse": {
-        "name": "ScanStartResponse",
-        "title": "ScanStartResponse",
-        "summary": "Scanning started",
+      "DoneResponse": {
+        "name": "DoneResponse",
+        "title": "DoneResponse",
+        "summary": "The request is done",
         "contentType": "application/json",
         "payload": {
           "type": "object",
@@ -3487,66 +3487,8 @@
           "required": [
             "status"
           ],
-          "description": "The response to `scan/start`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "ScanStartResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "ScanStopRequest": {
-        "name": "ScanStopRequest",
-        "title": "ScanStopRequest",
-        "summary": "Stop scanning",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "description": "Stop scanning, on `bridge/request/scan/stop`.",
-          "title": "ScanStopRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "ScanStopResponse": {
-        "name": "ScanStopResponse",
-        "title": "ScanStopResponse",
-        "summary": "Scanning stopped",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `scan/stop`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "ScanStopResponse",
+          "description": "The response to a request that is done once the controller has it:\n`scan/start`, `scan/stop`, `disconnect`, `connection/data_length`,\n`gatt/write`, `gatt/subscribe`, `advertise/data`, `advertise/stop`,\n`periodic/start`, `periodic/stop`, `periodic/terminate`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
+          "title": "DoneResponse",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -3626,10 +3568,10 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "DisconnectRequest": {
-        "name": "DisconnectRequest",
-        "title": "DisconnectRequest",
-        "summary": "Close a connection",
+      "HandleRequest": {
+        "name": "HandleRequest",
+        "title": "HandleRequest",
+        "summary": "A request on a connection",
         "contentType": "application/json",
         "payload": {
           "type": "object",
@@ -3648,66 +3590,8 @@
           "required": [
             "handle"
           ],
-          "description": "Close a connection, on `bridge/request/disconnect`.",
-          "title": "DisconnectRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "DisconnectResponse": {
-        "name": "DisconnectResponse",
-        "title": "DisconnectResponse",
-        "summary": "The connection is closed",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `disconnect`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "DisconnectResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "ConnectionsRequest": {
-        "name": "ConnectionsRequest",
-        "title": "ConnectionsRequest",
-        "summary": "List the connections",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "description": "List the open connections, on `bridge/request/connections`.",
-          "title": "ConnectionsRequest",
+          "description": "A request on one connection: `disconnect`, `connection/rssi`,\n`gatt/discover`, `pair`, `secure`.",
+          "title": "HandleRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -3955,74 +3839,6 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "ConnectionDataLengthResponse": {
-        "name": "ConnectionDataLengthResponse",
-        "title": "ConnectionDataLengthResponse",
-        "summary": "The data length is asked for",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `connection/data_length`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "ConnectionDataLengthResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "ConnectionRssiRequest": {
-        "name": "ConnectionRssiRequest",
-        "title": "ConnectionRssiRequest",
-        "summary": "Read a connection's signal strength",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "handle": {
-              "type": "integer",
-              "description": "The connection handle.",
-              "format": "uint16",
-              "minimum": 0,
-              "maximum": 65535
-            },
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "required": [
-            "handle"
-          ],
-          "description": "Read a connection's signal strength, on\n`bridge/request/connection/rssi`.",
-          "title": "ConnectionRssiRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
       "ConnectionRssiResponse": {
         "name": "ConnectionRssiResponse",
         "title": "ConnectionRssiResponse",
@@ -4137,33 +3953,6 @@
           ],
           "description": "The response to `gatt/mtu`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
           "title": "GattMtuResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "GattDiscoverRequest": {
-        "name": "GattDiscoverRequest",
-        "title": "GattDiscoverRequest",
-        "summary": "Discover a peer's GATT database",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "handle": {
-              "type": "integer",
-              "description": "The connection handle.",
-              "format": "uint16",
-              "minimum": 0,
-              "maximum": 65535
-            },
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "required": [
-            "handle"
-          ],
-          "description": "Discover a peer's services, characteristics and descriptors, on\n`bridge/request/gatt/discover`.",
-          "title": "GattDiscoverRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -4328,47 +4117,6 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "GattWriteResponse": {
-        "name": "GattWriteResponse",
-        "title": "GattWriteResponse",
-        "summary": "The attribute is written",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `gatt/write`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "GattWriteResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
       "GattSubscribeRequest": {
         "name": "GattSubscribeRequest",
         "title": "GattSubscribeRequest",
@@ -4414,145 +4162,9 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "GattSubscribeResponse": {
-        "name": "GattSubscribeResponse",
-        "title": "GattSubscribeResponse",
-        "summary": "The subscription is set",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `gatt/subscribe`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "GattSubscribeResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PairRequest": {
-        "name": "PairRequest",
-        "title": "PairRequest",
-        "summary": "Pair with a peer",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "handle": {
-              "type": "integer",
-              "description": "The connection handle.",
-              "format": "uint16",
-              "minimum": 0,
-              "maximum": 65535
-            },
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "required": [
-            "handle"
-          ],
-          "description": "Pair with the peer, on `bridge/request/pair`.",
-          "title": "PairRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PairResponse": {
-        "name": "PairResponse",
-        "title": "PairResponse",
-        "summary": "The link's security after pairing",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Security"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `pair`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "PairResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "SecureRequest": {
-        "name": "SecureRequest",
-        "title": "SecureRequest",
-        "summary": "Encrypt a link",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "handle": {
-              "type": "integer",
-              "description": "The connection handle.",
-              "format": "uint16",
-              "minimum": 0,
-              "maximum": 65535
-            },
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "required": [
-            "handle"
-          ],
-          "description": "Encrypt the link with a stored key, pairing when there is none, on\n`bridge/request/secure`.",
-          "title": "SecureRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "SecureResponse": {
-        "name": "SecureResponse",
-        "title": "SecureResponse",
+      "SecurityResponse": {
+        "name": "SecurityResponse",
+        "title": "SecurityResponse",
         "summary": "The link's security",
         "contentType": "application/json",
         "payload": {
@@ -4586,8 +4198,8 @@
           "required": [
             "status"
           ],
-          "description": "The response to `secure`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "SecureResponse",
+          "description": "The response to `pair` and `secure`: the link's security.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
+          "title": "SecurityResponse",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -4652,23 +4264,6 @@
           ],
           "description": "The response to `unpair`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
           "title": "UnpairResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "BondsRequest": {
-        "name": "BondsRequest",
-        "title": "BondsRequest",
-        "summary": "List the bonds",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "description": "List the stored bonds, on `bridge/request/bonds`.",
-          "title": "BondsRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -4832,51 +4427,10 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "AdvertiseDataResponse": {
-        "name": "AdvertiseDataResponse",
-        "title": "AdvertiseDataResponse",
-        "summary": "The set's data changed",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `advertise/data`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "AdvertiseDataResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "AdvertiseStopRequest": {
-        "name": "AdvertiseStopRequest",
-        "title": "AdvertiseStopRequest",
-        "summary": "Stop advertising",
+      "SetRequest": {
+        "name": "SetRequest",
+        "title": "SetRequest",
+        "summary": "A request on an advertising set",
         "contentType": "application/json",
         "payload": {
           "type": "object",
@@ -4895,49 +4449,8 @@
           "required": [
             "set"
           ],
-          "description": "Stop an advertising set, on `bridge/request/advertise/stop`.",
-          "title": "AdvertiseStopRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "AdvertiseStopResponse": {
-        "name": "AdvertiseStopResponse",
-        "title": "AdvertiseStopResponse",
-        "summary": "The set stopped",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `advertise/stop`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "AdvertiseStopResponse",
+          "description": "A request on one advertising set: `advertise/stop`, `periodic/stop`.",
+          "title": "SetRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -4982,115 +4495,6 @@
           ],
           "description": "Start periodic advertising on an extended set, on\n`bridge/request/periodic/start`.",
           "title": "PeriodicStartRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PeriodicStartResponse": {
-        "name": "PeriodicStartResponse",
-        "title": "PeriodicStartResponse",
-        "summary": "Periodic advertising started",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `periodic/start`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "PeriodicStartResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PeriodicStopRequest": {
-        "name": "PeriodicStopRequest",
-        "title": "PeriodicStopRequest",
-        "summary": "Stop periodic advertising",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "set": {
-              "type": "integer",
-              "description": "The set.",
-              "format": "uint8",
-              "minimum": 0,
-              "maximum": 255
-            },
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "required": [
-            "set"
-          ],
-          "description": "Stop a set's periodic advertising, on `bridge/request/periodic/stop`.",
-          "title": "PeriodicStopRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PeriodicStopResponse": {
-        "name": "PeriodicStopResponse",
-        "title": "PeriodicStopResponse",
-        "summary": "Periodic advertising stopped",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `periodic/stop`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "PeriodicStopResponse",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -5208,47 +4612,6 @@
           ],
           "description": "Stop following a periodic advertising train, on\n`bridge/request/periodic/terminate`.",
           "title": "PeriodicTerminateRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "PeriodicTerminateResponse": {
-        "name": "PeriodicTerminateResponse",
-        "title": "PeriodicTerminateResponse",
-        "summary": "The train is no longer followed",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "$ref": "#/components/schemas/Status"
-            },
-            "data": {
-              "description": "The result, when `status` is `ok`.",
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Done"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "error": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "What went wrong, when `status` is `error`."
-            },
-            "transaction": {
-              "description": "The request's `transaction`, echoed when it had one."
-            }
-          },
-          "required": [
-            "status"
-          ],
-          "description": "The response to `periodic/terminate`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
-          "title": "PeriodicTerminateResponse",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
@@ -5462,23 +4825,6 @@
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
-      "MeshNetworkRequest": {
-        "name": "MeshNetworkRequest",
-        "title": "MeshNetworkRequest",
-        "summary": "Show the mesh network",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "description": "Show the mesh network, on `bridge/request/mesh/network`.",
-          "title": "MeshNetworkRequest",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
       "MeshNetworkResponse": {
         "name": "MeshNetworkResponse",
         "title": "MeshNetworkResponse",
@@ -5517,23 +4863,6 @@
           ],
           "description": "The response to `mesh/network`.\n\nA response is published once per request, to\n`bridge/response/<request>`, and is not retained.",
           "title": "MeshNetworkResponse",
-          "$schema": "https://json-schema.org/draft/2020-12/schema"
-        }
-      },
-      "MeshUnprovisionedRequest": {
-        "name": "MeshUnprovisionedRequest",
-        "title": "MeshUnprovisionedRequest",
-        "summary": "List unprovisioned devices",
-        "contentType": "application/json",
-        "payload": {
-          "type": "object",
-          "properties": {
-            "transaction": {
-              "description": "Any value; the response echoes it, so a client can match the\ntwo."
-            }
-          },
-          "description": "List the unprovisioned devices heard, newest first, on\n`bridge/request/mesh/unprovisioned`.",
-          "title": "MeshUnprovisionedRequest",
           "$schema": "https://json-schema.org/draft/2020-12/schema"
         }
       },
