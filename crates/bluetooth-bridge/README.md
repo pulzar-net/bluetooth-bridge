@@ -15,7 +15,7 @@ pairing and advertising operation is a request on MQTT. See
 `bridge` for the topics.
 
 Part of [bluetooth-bridge](https://github.com/pulzar-net/bluetooth-bridge), maintained by
-[Pulzar](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
+[Pulzr](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
 [library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html) and the
 [API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_bridge/index.html).
 

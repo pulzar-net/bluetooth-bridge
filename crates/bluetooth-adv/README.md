@@ -30,7 +30,7 @@ assert!(matches!(beacons[0], beacon::Beacon::IBeacon(_)));
 ```
 
 Part of [bluetooth-bridge](https://github.com/pulzar-net/bluetooth-bridge), maintained by
-[Pulzar](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
+[Pulzr](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
 [library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html) and the
 [API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_adv/index.html).
 

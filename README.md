@@ -332,7 +332,7 @@ public repository and remain the SIG's; they are not copied into this
 repository. Bluetooth® is a registered trademark of the Bluetooth SIG, Inc.
 This project is not affiliated with or qualified by the Bluetooth SIG.
 
-## Maintained by Pulzar
+## Maintained by Pulzr
 
-bluetooth-bridge is maintained by [Pulzar](https://pulzr.net), which uses it
+bluetooth-bridge is maintained by [Pulzr](https://pulzr.net), which uses it
 in its own gateways. It is developed in the open, for anyone to use.

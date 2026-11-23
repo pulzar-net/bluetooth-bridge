@@ -20,7 +20,7 @@ assert_eq!(bluetooth_numbers::service(0x180f).map(|s| s.name), Some("Battery"));
 ```
 
 Part of [bluetooth-bridge](https://github.com/pulzar-net/bluetooth-bridge), maintained by
-[Pulzar](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
+[Pulzr](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
 [library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html) and the
 [API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_numbers/index.html).
 

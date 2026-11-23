@@ -40,7 +40,7 @@ while let Ok(HostEvent::Advertisement(r)) = events.recv().await {
 <!-- ANCHOR_END: scan -->
 
 Part of [bluetooth-bridge](https://github.com/pulzar-net/bluetooth-bridge), maintained by
-[Pulzar](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
+[Pulzr](https://pulzr.net). See the [user guide](https://oss.pulzr.net/bluetooth-bridge/), the
 [library guide](https://oss.pulzr.net/bluetooth-bridge/library/index.html) and the
 [API documentation](https://oss.pulzr.net/bluetooth-bridge/api/bluetooth_host/index.html).
 
