@@ -479,7 +479,9 @@ pub struct InfoData {
 
 response!(
     /// The response to `info`.
-    InfoResponse, InfoData, "The controller"
+    InfoResponse,
+    InfoData,
+    "The controller"
 );
 
 request!(
@@ -496,7 +498,9 @@ request!(
 
 response!(
     /// The response to `scan/start`.
-    ScanStartResponse, Done, "Scanning started"
+    ScanStartResponse,
+    Done,
+    "Scanning started"
 );
 
 request!(
@@ -506,7 +510,9 @@ request!(
 
 response!(
     /// The response to `scan/stop`.
-    ScanStopResponse, Done, "Scanning stopped"
+    ScanStopResponse,
+    Done,
+    "Scanning stopped"
 );
 
 // Connections.
@@ -534,7 +540,9 @@ pub struct ConnectData {
 
 response!(
     /// The response to `connect`.
-    ConnectResponse, ConnectData, "The device is connected"
+    ConnectResponse,
+    ConnectData,
+    "The device is connected"
 );
 
 request!(
@@ -547,7 +555,9 @@ request!(
 
 response!(
     /// The response to `disconnect`.
-    DisconnectResponse, Done, "The connection is closed"
+    DisconnectResponse,
+    Done,
+    "The connection is closed"
 );
 
 request!(
@@ -577,7 +587,9 @@ pub struct ConnectionInfo {
 
 response!(
     /// The response to `connections`.
-    ConnectionsResponse, Vec<ConnectionInfo>, "The open connections"
+    ConnectionsResponse,
+    Vec<ConnectionInfo>,
+    "The open connections"
 );
 
 request!(
@@ -593,7 +605,9 @@ request!(
 
 response!(
     /// The response to `connection/params`.
-    ConnectionParamsResponse, ConnParams, "The parameters now in use"
+    ConnectionParamsResponse,
+    ConnParams,
+    "The parameters now in use"
 );
 
 request!(
@@ -623,7 +637,9 @@ pub struct PhyData {
 
 response!(
     /// The response to `connection/phy`.
-    ConnectionPhyResponse, PhyData, "The PHYs now in use"
+    ConnectionPhyResponse,
+    PhyData,
+    "The PHYs now in use"
 );
 
 request!(
@@ -641,7 +657,9 @@ request!(
 
 response!(
     /// The response to `connection/data_length`.
-    ConnectionDataLengthResponse, Done, "The data length is asked for"
+    ConnectionDataLengthResponse,
+    Done,
+    "The data length is asked for"
 );
 
 request!(
@@ -663,7 +681,9 @@ pub struct RssiData {
 
 response!(
     /// The response to `connection/rssi`.
-    ConnectionRssiResponse, RssiData, "The connection's signal strength"
+    ConnectionRssiResponse,
+    RssiData,
+    "The connection's signal strength"
 );
 
 // GATT client.
@@ -688,7 +708,9 @@ pub struct MtuData {
 
 response!(
     /// The response to `gatt/mtu`.
-    GattMtuResponse, MtuData, "The ATT MTU now in use"
+    GattMtuResponse,
+    MtuData,
+    "The ATT MTU now in use"
 );
 
 request!(
@@ -702,7 +724,9 @@ request!(
 
 response!(
     /// The response to `gatt/discover`.
-    GattDiscoverResponse, Vec<Service>, "The peer's services"
+    GattDiscoverResponse,
+    Vec<Service>,
+    "The peer's services"
 );
 
 request!(
@@ -726,7 +750,9 @@ pub struct ValueData {
 
 response!(
     /// The response to `gatt/read`.
-    GattReadResponse, ValueData, "The attribute's value"
+    GattReadResponse,
+    ValueData,
+    "The attribute's value"
 );
 
 request!(
@@ -747,7 +773,9 @@ request!(
 
 response!(
     /// The response to `gatt/write`.
-    GattWriteResponse, Done, "The attribute is written"
+    GattWriteResponse,
+    Done,
+    "The attribute is written"
 );
 
 request!(
@@ -770,7 +798,9 @@ request!(
 
 response!(
     /// The response to `gatt/subscribe`.
-    GattSubscribeResponse, Done, "The subscription is set"
+    GattSubscribeResponse,
+    Done,
+    "The subscription is set"
 );
 
 // Security.
@@ -785,7 +815,9 @@ request!(
 
 response!(
     /// The response to `pair`.
-    PairResponse, Security, "The link's security after pairing"
+    PairResponse,
+    Security,
+    "The link's security after pairing"
 );
 
 request!(
@@ -799,7 +831,9 @@ request!(
 
 response!(
     /// The response to `secure`.
-    SecureResponse, Security, "The link's security"
+    SecureResponse,
+    Security,
+    "The link's security"
 );
 
 request!(
@@ -820,7 +854,9 @@ pub struct UnpairData {
 
 response!(
     /// The response to `unpair`.
-    UnpairResponse, UnpairData, "The bond is forgotten"
+    UnpairResponse,
+    UnpairData,
+    "The bond is forgotten"
 );
 
 request!(
@@ -848,7 +884,9 @@ pub struct BondInfo {
 
 response!(
     /// The response to `bonds`.
-    BondsResponse, Vec<BondInfo>, "The stored bonds"
+    BondsResponse,
+    Vec<BondInfo>,
+    "The stored bonds"
 );
 
 // Advertising.
@@ -878,7 +916,9 @@ pub struct SetData {
 
 response!(
     /// The response to `advertise/start`.
-    AdvertiseStartResponse, SetData, "The advertising set started"
+    AdvertiseStartResponse,
+    SetData,
+    "The advertising set started"
 );
 
 request!(
@@ -898,7 +938,9 @@ request!(
 
 response!(
     /// The response to `advertise/data`.
-    AdvertiseDataResponse, Done, "The set's data changed"
+    AdvertiseDataResponse,
+    Done,
+    "The set's data changed"
 );
 
 request!(
@@ -911,7 +953,9 @@ request!(
 
 response!(
     /// The response to `advertise/stop`.
-    AdvertiseStopResponse, Done, "The set stopped"
+    AdvertiseStopResponse,
+    Done,
+    "The set stopped"
 );
 
 request!(
@@ -931,7 +975,9 @@ request!(
 
 response!(
     /// The response to `periodic/start`.
-    PeriodicStartResponse, Done, "Periodic advertising started"
+    PeriodicStartResponse,
+    Done,
+    "Periodic advertising started"
 );
 
 request!(
@@ -944,7 +990,9 @@ request!(
 
 response!(
     /// The response to `periodic/stop`.
-    PeriodicStopResponse, Done, "Periodic advertising stopped"
+    PeriodicStopResponse,
+    Done,
+    "Periodic advertising stopped"
 );
 
 request!(
@@ -976,7 +1024,9 @@ pub struct SyncData {
 
 response!(
     /// The response to `periodic/sync`.
-    PeriodicSyncResponse, SyncData, "The train is followed"
+    PeriodicSyncResponse,
+    SyncData,
+    "The train is followed"
 );
 
 request!(
@@ -990,7 +1040,9 @@ request!(
 
 response!(
     /// The response to `periodic/terminate`.
-    PeriodicTerminateResponse, Done, "The train is no longer followed"
+    PeriodicTerminateResponse,
+    Done,
+    "The train is no longer followed"
 );
 
 // GATT server.
@@ -1006,7 +1058,9 @@ request!(
 
 response!(
     /// The response to `server/add`.
-    ServerAddResponse, ServiceHandles, "The service's handles"
+    ServerAddResponse,
+    ServiceHandles,
+    "The service's handles"
 );
 
 request!(
@@ -1035,7 +1089,9 @@ pub struct ServerSetData {
 
 response!(
     /// The response to `server/set`.
-    ServerSetResponse, ServerSetData, "The value is set"
+    ServerSetResponse,
+    ServerSetData,
+    "The value is set"
 );
 
 request!(
@@ -1057,7 +1113,9 @@ pub struct ServerValueData {
 
 response!(
     /// The response to `server/get`.
-    ServerGetResponse, ServerValueData, "The value"
+    ServerGetResponse,
+    ServerValueData,
+    "The value"
 );
 
 // Mesh.
@@ -1093,7 +1151,9 @@ pub struct MeshNetworkData {
 
 response!(
     /// The response to `mesh/network`.
-    MeshNetworkResponse, MeshNetworkData, "The mesh network"
+    MeshNetworkResponse,
+    MeshNetworkData,
+    "The mesh network"
 );
 
 request!(
@@ -1116,7 +1176,9 @@ pub struct UnprovisionedDevice {
 
 response!(
     /// The response to `mesh/unprovisioned`.
-    MeshUnprovisionedResponse, Vec<UnprovisionedDevice>, "The unprovisioned devices heard"
+    MeshUnprovisionedResponse,
+    Vec<UnprovisionedDevice>,
+    "The unprovisioned devices heard"
 );
 
 request!(
@@ -1133,7 +1195,9 @@ request!(
 
 response!(
     /// The response to `mesh/provision`.
-    MeshProvisionResponse, MeshNode, "The device is a node"
+    MeshProvisionResponse,
+    MeshNode,
+    "The device is a node"
 );
 
 request!(
@@ -1213,7 +1277,9 @@ pub enum MeshModel {
 
 response!(
     /// The response to `mesh/configure`.
-    MeshConfigureResponse, MeshComposition, "The node's composition"
+    MeshConfigureResponse,
+    MeshComposition,
+    "The node's composition"
 );
 
 request!(
@@ -1237,7 +1303,9 @@ pub struct OnOffData {
 
 response!(
     /// The response to `mesh/onoff`.
-    MeshOnOffResponse, OnOffData, "The node's state"
+    MeshOnOffResponse,
+    OnOffData,
+    "The node's state"
 );
 
 /// The response to a request the bridge could not read: not JSON, or not a
