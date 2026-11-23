@@ -93,6 +93,7 @@ impl Default for AdvertisingParams {
 
 /// A periodic advertising train on a set.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default)]
 pub struct PeriodicParams {
     /// Minimum interval, ms (7.5 or more).

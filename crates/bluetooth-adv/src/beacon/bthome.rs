@@ -30,6 +30,7 @@ type BtHomeCcm = ccm::Ccm<Aes128, U4, U13>;
 /// A BTHome v2 frame.
 #[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct BtHome {
     /// The frame was encrypted.
     pub encrypted: bool,
@@ -73,6 +74,7 @@ pub struct BtHome {
 /// A measurement or state.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Measurement {
     /// The object id.
     pub object_id: u8,
@@ -87,6 +89,7 @@ pub struct Measurement {
 /// A button or dimmer event.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Event {
     /// `button` or `dimmer`.
     pub kind: &'static str,

@@ -40,7 +40,7 @@ pub fn connect(config: &MqttConfig) -> Result<(Mqtt, mpsc::Receiver<Incoming>), 
     options.set_max_packet_size(256 * 1024, 256 * 1024);
     options.set_last_will(LastWill::new(
         state_topic(&config.base_topic),
-        r#"{"state":"offline"}"#,
+        crate::api::BridgeState::payload(crate::api::Availability::Offline),
         QoS::AtLeastOnce,
         true,
     ));
@@ -114,9 +114,26 @@ impl Mqtt {
         }
     }
 
-    /// Publishes JSON.
-    pub fn publish_json(&self, topic: impl Into<String>, value: &serde_json::Value, retain: bool) {
+    /// Publishes one of the [`api`](crate::api) payloads as JSON.
+    pub fn publish_json<T: serde::Serialize>(
+        &self,
+        topic: impl Into<String>,
+        value: &T,
+        retain: bool,
+    ) {
         self.publish(topic, serde_json::to_vec(value).unwrap_or_default(), retain);
+    }
+
+    /// Publishes one of the [`api`](crate::api) payloads as JSON, reliably
+    /// (QoS 1).
+    pub async fn publish_reliable_json<T: serde::Serialize>(
+        &self,
+        topic: impl Into<String>,
+        value: &T,
+        retain: bool,
+    ) {
+        self.publish_reliable(topic, serde_json::to_vec(value).unwrap_or_default(), retain)
+            .await;
     }
 
     /// Subscribes.

@@ -28,6 +28,10 @@ export default [
 				"slug": "mqtt"
 			},
 			{
+				"label": "MQTT reference",
+				"slug": "mqtt-reference"
+			},
+			{
 				"label": "Sensors and beacons",
 				"slug": "sensors"
 			},

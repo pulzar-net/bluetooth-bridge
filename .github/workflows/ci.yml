@@ -56,11 +56,21 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo clippy -p bluetooth-host --features fuzzing --all-targets -- -D warnings
+      - run: cargo clippy -p bluetooth-bridge --features unstable-asyncapi-docs --all-targets -- -D warnings
       - name: Tests, with the Bumble end-to-end suite required
         env:
           BUMBLE_PYTHON: python
           BUMBLE_REQUIRED: "1"
         run: cargo test --workspace
+      - name: Default builds carry no docs tooling (asyncapi-rust, schemars)
+        run: |
+          set -euo pipefail
+          for crate in $(cargo metadata --no-deps --format-version 1 | jq -r '.packages[].name'); do
+            if cargo tree -q -e normal -p "${crate}" --prefix none | grep -E '^(asyncapi-rust|schemars) '; then
+              echo "::error::${crate} pulls in docs tooling with default features"
+              exit 1
+            fi
+          done
       - name: The fuzz entry points on random and mutated input
         run: cargo test --release -p bluetooth-host --features fuzzing --test fuzz_smoke
       - name: Memory budget, a busy site
@@ -72,7 +82,7 @@ jobs:
       # What crates.io would get: each crate packaged with only its include
       # list and built from the package, against its siblings' packages.
       - name: The crates package and build as published
-        run: cargo package --workspace
+        run: cargo package --workspace --locked
 
   fuzz:
     runs-on: ubuntu-latest

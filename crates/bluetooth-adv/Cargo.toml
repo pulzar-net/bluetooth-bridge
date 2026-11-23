@@ -18,6 +18,9 @@ categories = ["parser-implementations", "hardware-support"]
 [features]
 default = ["serde"]
 serde = ["dep:serde"]
+## JSON Schema for the serialized types (the bridge's MQTT reference is
+## generated from them).
+schema = ["serde", "dep:schemars"]
 
 [dependencies]
 bluetooth-numbers.workspace = true
@@ -26,6 +29,7 @@ ccm.workspace = true
 md-5 = { version = "0.11", default-features = false }
 ruuvi-sensor-protocol.workspace = true
 serde = { workspace = true, optional = true }
+schemars = { version = "1", optional = true, features = ["preserve_order"] }
 hex.workspace = true
 
 [dev-dependencies]

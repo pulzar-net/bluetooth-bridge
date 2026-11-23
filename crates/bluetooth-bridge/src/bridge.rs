@@ -1,16 +1,7 @@
 //! The bridge: the host's events out to MQTT, requests from MQTT in.
 //!
-//! Topics, under `base` (`bluetooth` by default):
-//!
-//! | Topic | Direction | What |
-//! |---|---|---|
-//! | `base/bridge/state` | out, retained | `{"state":"online"}` or `offline` (the will) |
-//! | `base/bridge/info` | out, retained | the controller and its capabilities |
-//! | `base/scan/<ADDRESS>` | out | every advertisement after duplicate filtering, parsed |
-//! | `base/device/<ADDRESS>` | out | a device's decoded readings, for Home Assistant |
-//! | `base/bridge/event` | out | connections, pairing, notifications, GATT writes, periodic reports |
-//! | `base/bridge/request/<op>` | in | a request, JSON, optionally with a `transaction` id |
-//! | `base/bridge/response/<op>` | out | `{"transaction", "status", "data" or "error"}`, status `ok` or `error` |
+//! Every topic's payload is a type in [`crate::api`], which is the contract
+//! and from which the docs' MQTT reference is generated.
 //!
 //! Addresses in topics are twelve upper-case hex digits, most significant
 //! first (`BC5729000001`).
@@ -20,14 +11,14 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bluetooth_adv::beacon::{self, Beacon};
-use bluetooth_host::gatt::server::ServiceDef;
 use bluetooth_host::{
-    Address, AdvertisingParams, ConnEvent, ConnectParams, Connection, FixedAgent, Host, HostConfig,
-    HostEvent, ParamsRequest, PeriodicParams, Phy, Report, ScanConfig, TransportSpec,
+    Address, ConnEvent, Connection, FixedAgent, Host, HostConfig, HostEvent, Report, ScanConfig,
+    TransportSpec,
 };
-use serde::Deserialize;
-use serde_json::{json, Value};
+use serde::de::DeserializeOwned;
+use serde_json::Value as Json;
 
+use crate::api::*;
 use crate::config::Config;
 use crate::ha;
 use crate::mqtt::{self, Incoming, Mqtt};
@@ -61,7 +52,7 @@ pub async fn run(config: Config) -> Result<(), String> {
         tokio::select! {
             e = events.recv() => match e {
                 Ok(HostEvent::Stopped(reason)) => {
-                    b.mqtt.publish_reliable(mqtt::state_topic(&b.base), r#"{"state":"offline"}"#, true).await;
+                    b.mqtt.publish_reliable(mqtt::state_topic(&b.base), BridgeState::payload(Availability::Offline), true).await;
                     return Err(format!("the Bluetooth host stopped: {reason}"));
                 }
                 Ok(e) => b.on_host_event(e).await,
@@ -78,7 +69,7 @@ pub async fn run(config: Config) -> Result<(), String> {
             _ = shutdown() => {
                 tracing::info!("stopping");
                 let _ = b.host.stop_scan().await;
-                b.mqtt.publish_reliable(mqtt::state_topic(&b.base), r#"{"state":"offline"}"#, true).await;
+                b.mqtt.publish_reliable(mqtt::state_topic(&b.base), BridgeState::payload(Availability::Offline), true).await;
                 b.mqtt.disconnect().await;
                 return Ok(());
             }
@@ -249,10 +240,14 @@ impl Bridge {
                 .await;
         }
         self.mqtt
-            .publish_reliable(mqtt::state_topic(&base), r#"{"state":"online"}"#, true)
+            .publish_reliable(
+                mqtt::state_topic(&base),
+                BridgeState::payload(Availability::Online),
+                true,
+            )
             .await;
         self.mqtt
-            .publish_reliable(format!("{base}/bridge/info"), self.info().to_string(), true)
+            .publish_reliable_json(format!("{base}/bridge/info"), &self.info(), true)
             .await;
         self.discovered.clear();
         if self.config.homeassistant.enabled {
@@ -261,21 +256,21 @@ impl Bridge {
                 &base,
                 env!("CARGO_PKG_VERSION"),
             );
-            self.mqtt.publish_reliable(t, c.to_string(), true).await;
+            self.mqtt.publish_reliable_json(t, &c, true).await;
         }
     }
 
-    fn info(&self) -> Value {
+    fn info(&self) -> BridgeInfo {
         let c = self.host.capabilities();
-        json!({
-            "version": env!("CARGO_PKG_VERSION"),
-            "address": self.host.address(),
-            "controller": c,
-            "manufacturer_name": c.manufacturer_name(),
-            "core_version": c.version_name(),
-            "le_features": c.le_feature_names(),
-            "transport": self.config.adapter.transport,
-        })
+        BridgeInfo {
+            version: env!("CARGO_PKG_VERSION").into(),
+            address: self.host.address(),
+            controller: c.clone(),
+            manufacturer_name: c.manufacturer_name().map(str::to_string),
+            core_version: c.version_name().map(str::to_string),
+            le_features: names(c.le_feature_names()),
+            transport: self.config.adapter.transport.clone(),
+        }
     }
 
     fn allowed(&self, a: &Address) -> bool {
@@ -290,43 +285,76 @@ impl Bridge {
 
     async fn on_host_event(&mut self, e: HostEvent) {
         let base = self.base.clone();
-        match e {
-            HostEvent::Advertisement(r) => self.on_report(&r).await,
+        let event = match e {
+            HostEvent::Advertisement(r) => return self.on_report(&r).await,
             HostEvent::Connected(c) => {
-                self.event(json!({"type": "connected", "handle": c.handle(), "address": c.peer(),
-                    "identity": c.identity(), "role": c.role()}));
+                let event = BridgeEvent::Connected {
+                    handle: c.handle(),
+                    address: c.peer(),
+                    identity: c.identity(),
+                    role: c.role(),
+                };
                 self.watch_connection(c);
+                event
             }
-            HostEvent::Disconnected { handle, peer, reason } => self.event(json!({
-                "type": "disconnected", "handle": handle, "address": peer, "reason": reason,
-                "reason_name": bluetooth_host::error::status_name(reason)})),
-            HostEvent::Paired { handle, identity, bonded, security } => self.event(json!({
-                "type": "paired", "handle": handle, "identity": identity, "bonded": bonded, "security": security,
-                "level": security.level()})),
+            HostEvent::Disconnected {
+                handle,
+                peer,
+                reason,
+            } => BridgeEvent::Disconnected {
+                handle,
+                address: peer,
+                reason,
+                reason_name: bluetooth_host::error::status_name(reason).into(),
+            },
+            HostEvent::Paired {
+                handle,
+                identity,
+                bonded,
+                security,
+            } => BridgeEvent::Paired {
+                handle,
+                identity,
+                bonded,
+                security,
+                level: security.level(),
+            },
             HostEvent::PairingFailed { handle, reason } => {
-                self.event(json!({"type": "pairing_failed", "handle": handle, "reason": reason}))
+                BridgeEvent::PairingFailed { handle, reason }
             }
-            HostEvent::GattWrite { handle, attribute, value } => self.event(json!({
-                "type": "gatt_write", "handle": handle, "attribute": attribute, "value": hex::encode(value)})),
-            HostEvent::GattSubscription { handle, attribute, notify, indicate } => self.event(json!({
-                "type": "gatt_subscription", "handle": handle, "attribute": attribute,
-                "notify": notify, "indicate": indicate})),
-            HostEvent::PeriodicReport(r) => self.event(json!({"type": "periodic_report", "report": *r,
-                "advertisement": bluetooth_adv::Advertisement::parse(&r.data)})),
-            HostEvent::PeriodicSyncLost { sync } => self.event(json!({"type": "periodic_sync_lost", "sync": sync})),
+            HostEvent::GattWrite {
+                handle,
+                attribute,
+                value,
+            } => BridgeEvent::GattWrite {
+                handle,
+                attribute,
+                value: hex::encode(value),
+            },
+            HostEvent::GattSubscription {
+                handle,
+                attribute,
+                notify,
+                indicate,
+            } => BridgeEvent::GattSubscription {
+                handle,
+                attribute,
+                notify,
+                indicate,
+            },
+            HostEvent::PeriodicReport(r) => BridgeEvent::PeriodicReport {
+                advertisement: Box::new(bluetooth_adv::Advertisement::parse(&r.data)),
+                report: (*r).clone(),
+            },
+            HostEvent::PeriodicSyncLost { sync } => BridgeEvent::PeriodicSyncLost { sync },
             HostEvent::AdvertisingStopped { set, connection } => {
-                self.event(json!({"type": "advertising_stopped", "set": set, "connection": connection}))
+                BridgeEvent::AdvertisingStopped { set, connection }
             }
-            HostEvent::ScanRequest { set, scanner } => {
-                self.event(json!({"type": "scan_request", "set": set, "scanner": scanner}))
-            }
-            other => tracing::debug!("{base}: {other:?}"),
-        }
-    }
-
-    fn event(&self, v: Value) {
+            HostEvent::ScanRequest { set, scanner } => BridgeEvent::ScanRequest { set, scanner },
+            other => return tracing::debug!("{base}: {other:?}"),
+        };
         self.mqtt
-            .publish_json(format!("{}/bridge/event", self.base), &v, false);
+            .publish_json(format!("{}/bridge/event", self.base), &event, false);
     }
 
     /// Forwards a connection's notifications as events.
@@ -336,21 +364,26 @@ impl Bridge {
         let mut rx = c.events();
         tokio::spawn(async move {
             loop {
-                match rx.recv().await {
-                    Ok(ConnEvent::Notification { handle, value, indication }) => mqtt.publish_json(
-                        topic.clone(),
-                        &json!({"type": "notification", "handle": c.handle(), "attribute": handle,
-                            "value": hex::encode(value), "indication": indication}),
-                        false,
-                    ),
-                    Ok(ConnEvent::Disconnected(_)) | Err(tokio::sync::broadcast::error::RecvError::Closed) => return,
-                    Ok(other) => mqtt.publish_json(
-                        topic.clone(),
-                        &json!({"type": "connection", "handle": c.handle(), "change": format!("{other:?}")}),
-                        false,
-                    ),
-                    Err(_) => {}
-                }
+                let event = match rx.recv().await {
+                    Ok(ConnEvent::Notification {
+                        handle,
+                        value,
+                        indication,
+                    }) => BridgeEvent::Notification {
+                        handle: c.handle(),
+                        attribute: handle,
+                        value: hex::encode(value),
+                        indication,
+                    },
+                    Ok(ConnEvent::Disconnected(_))
+                    | Err(tokio::sync::broadcast::error::RecvError::Closed) => return,
+                    Ok(other) => BridgeEvent::ConnectionChanged {
+                        handle: c.handle(),
+                        change: format!("{other:?}"),
+                    },
+                    Err(_) => continue,
+                };
+                mqtt.publish_json(topic.clone(), &event, false);
             }
         });
     }
@@ -377,52 +410,43 @@ impl Bridge {
         }
         let beacons = beacon::decode(&adv, &ctx);
         let id = topic_id(&device);
-        if self.config.scan.publish_reports {
-            let mut v = serde_json::to_value(r).unwrap_or(Value::Null);
-            v["advertisement"] = serde_json::to_value(&adv).unwrap_or(Value::Null);
-            if let Some(n) = adv.local_name.as_ref() {
-                v["name"] = json!(n.name);
-            }
-            if !beacons.is_empty() {
-                v["beacons"] = serde_json::to_value(&beacons).unwrap_or(Value::Null);
-            }
-            self.mqtt
-                .publish_json(format!("{}/scan/{id}", self.base), &v, false);
-        }
         let readings: Vec<_> = beacons.iter().flat_map(Beacon::readings).collect();
+        let name = adv.local_name.as_ref().map(|n| n.name.clone());
+        let model = beacons
+            .first()
+            .map(|b| b.format())
+            .unwrap_or("Bluetooth LE")
+            .to_string();
+        let manufacturer = adv.manufacturer_data.first().and_then(|m| m.company);
+        if self.config.scan.publish_reports {
+            let report = ScanReport {
+                report: r.clone(),
+                advertisement: adv,
+                name: name.clone(),
+                beacons,
+            };
+            self.mqtt
+                .publish_json(format!("{}/scan/{id}", self.base), &report, false);
+        }
         if readings.is_empty() {
             return;
         }
-        let mut state = serde_json::Map::new();
-        for x in &readings {
-            state.insert(x.key.clone(), json!(x.value));
-        }
-        state.insert("rssi".into(), json!(r.rssi));
-        state.insert(
-            "last_seen".into(),
-            json!(r
+        let state = DeviceState {
+            readings: readings
+                .iter()
+                .map(|x| (x.key.clone(), serde_json::json!(x.value)))
+                .collect(),
+            rssi: r.rssi,
+            last_seen: r
                 .time
                 .duration_since(std::time::UNIX_EPOCH)
                 .map(|d| d.as_millis() as u64)
-                .unwrap_or(0)),
-        );
-        self.mqtt.publish_json(
-            format!("{}/device/{id}", self.base),
-            &Value::Object(state),
-            false,
-        );
+                .unwrap_or(0),
+        };
+        self.mqtt
+            .publish_json(format!("{}/device/{id}", self.base), &state, false);
         if self.config.homeassistant.enabled {
-            let name = adv
-                .local_name
-                .as_ref()
-                .map(|n| n.name.clone())
-                .unwrap_or_else(|| device.to_string());
-            let model = beacons
-                .first()
-                .map(|b| b.format())
-                .unwrap_or("Bluetooth LE")
-                .to_string();
-            let manufacturer = adv.manufacturer_data.first().and_then(|m| m.company);
+            let name = name.unwrap_or_else(|| device.to_string());
             let mut keys: Vec<(String, &'static str)> =
                 readings.iter().map(|x| (x.key.clone(), x.unit)).collect();
             keys.push(("rssi".into(), "dBm"));
@@ -438,7 +462,7 @@ impl Bridge {
                         &key,
                         unit,
                     );
-                    self.mqtt.publish(t, c.to_string(), true);
+                    self.mqtt.publish_json(t, &c, true);
                 }
             }
         }
@@ -446,7 +470,7 @@ impl Bridge {
 
     async fn on_message(&mut self, topic: &str, payload: &[u8]) {
         if topic == self.config.homeassistant.status_topic {
-            if payload == b"online" {
+            if HomeAssistantStatus::parse(payload) == Some(HomeAssistantState::Online) {
                 // Home Assistant restarted: discovery again.
                 self.discovered.clear();
             }
@@ -458,252 +482,395 @@ impl Bridge {
         else {
             return;
         };
-        let body: Value = if payload.is_empty() {
-            json!({})
+        let reply = format!("{}/bridge/response/{op}", self.base);
+        let body: Json = if payload.is_empty() {
+            Json::Object(Default::default())
         } else {
             match serde_json::from_slice(payload) {
                 Ok(v) => v,
                 Err(e) => {
-                    self.respond(
-                        &op,
-                        &Value::Null,
-                        Err(format!("the request is not JSON: {e}")),
-                    );
+                    let r = ErrorResponse::new(format!("the request is not JSON: {e}"), None);
+                    self.mqtt.publish_json(reply, &r, false);
                     return;
                 }
             }
         };
-        let transaction = body.get("transaction").cloned().unwrap_or(Value::Null);
+        let mqtt = self.mqtt.clone();
         if let Some(mesh_op) = op.strip_prefix("mesh/") {
             let Some(mesh) = self.mesh.clone() else {
-                self.respond(
-                    &op,
-                    &transaction,
-                    Err("the mesh is off ([mesh] enabled)".into()),
+                let r = ErrorResponse::new(
+                    "the mesh is off ([mesh] enabled)".into(),
+                    transaction(&body),
                 );
+                self.mqtt.publish_json(reply, &r, false);
                 return;
             };
-            let (mqtt, base, op, mesh_op) = (
-                self.mqtt.clone(),
-                self.base.clone(),
-                op.clone(),
-                mesh_op.to_string(),
-            );
+            let mesh_op = mesh_op.to_string();
             tokio::spawn(async move {
                 let r = mesh.request(&mesh_op, &body).await;
-                respond(&mqtt, &base, &op, &transaction, r);
+                mqtt.publish(reply, r, false);
             });
             return;
         }
         // A scan started by request keeps hearing the mesh.
-        let mut body = body;
-        if op == "scan/start" {
-            if let Ok(c) = opt::<ScanConfig>(&body, "config") {
-                body["config"] = serde_json::to_value(self.scan_config(c)).unwrap_or(Value::Null);
-            }
-        }
+        let always_report = if self.config.mesh.enabled {
+            crate::mesh::AD_TYPES.to_vec()
+        } else {
+            Vec::new()
+        };
         // Requests that wait on the radio run on their own so scanning keeps flowing.
         let host = self.host.clone();
-        let mqtt = self.mqtt.clone();
-        let base = self.base.clone();
-        let op2 = op.clone();
         tokio::spawn(async move {
-            let r = request(&host, &op2, body).await;
-            respond(&mqtt, &base, &op2, &transaction, r);
+            let r = request(&host, &op, &body, &always_report).await;
+            mqtt.publish(reply, r, false);
         });
     }
-
-    fn respond(&self, op: &str, transaction: &Value, r: Result<Value, String>) {
-        respond(&self.mqtt, &self.base, op, transaction, r);
-    }
 }
 
-fn respond(mqtt: &Mqtt, base: &str, op: &str, transaction: &Value, r: Result<Value, String>) {
-    let mut v = match r {
-        Ok(data) => json!({"status": "ok", "data": data}),
-        Err(e) => json!({"status": "error", "error": e}),
+/// The request's `transaction`, if it has one.
+pub(crate) fn transaction(body: &Json) -> Option<Json> {
+    body.get("transaction").filter(|t| !t.is_null()).cloned()
+}
+
+/// Reads a request as `Q`, runs it, and serializes its response `R`, with
+/// the request's `transaction`.
+pub(crate) async fn answer<Q, R>(
+    body: &Json,
+    run: impl AsyncFnOnce(Q) -> Result<R::Data, String>,
+) -> Vec<u8>
+where
+    Q: DeserializeOwned,
+    R: Response,
+{
+    let result = match serde_json::from_value::<Q>(body.clone()) {
+        Ok(q) => run(q).await,
+        Err(e) => Err(e.to_string()),
     };
-    if !transaction.is_null() {
-        v["transaction"] = transaction.clone();
-    }
-    mqtt.publish_json(format!("{base}/bridge/response/{op}"), &v, false);
+    serde_json::to_vec(&R::new(result, transaction(body))).unwrap_or_default()
 }
 
-fn field<T: for<'de> Deserialize<'de>>(body: &Value, name: &str) -> Result<T, String> {
-    serde_json::from_value(body.get(name).cloned().unwrap_or(Value::Null))
-        .map_err(|e| format!("`{name}`: {e}"))
+/// Decodes a hex field.
+pub(crate) fn unhex(name: &str, s: &str) -> Result<Vec<u8>, String> {
+    hex::decode(s).map_err(|e| format!("`{name}`: {e}"))
 }
 
-fn opt<T: for<'de> Deserialize<'de> + Default>(body: &Value, name: &str) -> Result<T, String> {
-    match body.get(name) {
-        None | Some(Value::Null) => Ok(T::default()),
-        Some(v) => serde_json::from_value(v.clone()).map_err(|e| format!("`{name}`: {e}")),
-    }
+fn names(v: Vec<&'static str>) -> Vec<String> {
+    v.into_iter().map(str::to_string).collect()
 }
 
-fn hex_field(body: &Value, name: &str) -> Result<Vec<u8>, String> {
-    match body.get(name).and_then(Value::as_str) {
-        None => Ok(Vec::new()),
-        Some(s) => hex::decode(s).map_err(|e| format!("`{name}`: {e}")),
-    }
+fn conn(host: &Host, handle: u16) -> Result<Connection, String> {
+    host.connection(handle)
+        .ok_or_else(|| format!("no connection {handle}"))
 }
 
-fn conn(host: &Host, body: &Value) -> Result<Connection, String> {
-    let h: u16 = field(body, "handle")?;
-    host.connection(h)
-        .ok_or_else(|| format!("no connection {h}"))
-}
-
-/// Runs one request.
-pub async fn request(host: &Host, op: &str, body: Value) -> Result<Value, String> {
+/// Runs one request and returns its response, serialized. A scan it
+/// starts always reports `always_report`'s AD types too.
+pub async fn request(host: &Host, op: &str, body: &Json, always_report: &[u8]) -> Vec<u8> {
     let e = |x: bluetooth_host::Error| x.to_string();
     match op {
-        "info" => Ok(json!({"address": host.address(), "controller": host.capabilities(),
-            "le_features": host.capabilities().le_feature_names()})),
+        "info" => {
+            answer::<InfoRequest, InfoResponse>(body, async |_| {
+                let c = host.capabilities();
+                Ok(InfoData {
+                    address: host.address(),
+                    controller: c.clone(),
+                    le_features: names(c.le_feature_names()),
+                })
+            })
+            .await
+        }
         "scan/start" => {
-            let c: ScanConfig = opt(&body, "config")?;
-            host.start_scan(c).await.map_err(e)?;
-            Ok(json!({}))
+            answer::<ScanStartRequest, ScanStartResponse>(body, async |q| {
+                let mut c = q.config.unwrap_or_default();
+                for t in always_report {
+                    if !c.always_report.contains(t) {
+                        c.always_report.push(*t);
+                    }
+                }
+                host.start_scan(c).await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
-        "scan/stop" => host.stop_scan().await.map(|_| json!({})).map_err(e),
+        "scan/stop" => {
+            answer::<ScanStopRequest, ScanStopResponse>(body, async |_| {
+                host.stop_scan().await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
+        }
         "connect" => {
-            let a: Address = field(&body, "address")?;
-            let p: ConnectParams = opt(&body, "params")?;
-            let c = host.connect(a, &p).await.map_err(e)?;
-            Ok(json!({"handle": c.handle(), "params": c.params()}))
+            answer::<ConnectRequest, ConnectResponse>(body, async |q| {
+                let c = host
+                    .connect(q.address, &q.params.unwrap_or_default())
+                    .await
+                    .map_err(e)?;
+                Ok(ConnectData {
+                    handle: c.handle(),
+                    params: c.params(),
+                })
+            })
+            .await
         }
-        "disconnect" => conn(host, &body)?.disconnect().await.map(|_| json!({})).map_err(e),
-        "connections" => Ok(json!(host
-            .connections()
-            .iter()
-            .map(|c| json!({"handle": c.handle(), "address": c.peer(), "identity": c.identity(),
-                "role": c.role(), "params": c.params(), "security": c.security(), "mtu": c.att_mtu()}))
-            .collect::<Vec<_>>())),
+        "disconnect" => {
+            answer::<DisconnectRequest, DisconnectResponse>(body, async |q| {
+                conn(host, q.handle)?.disconnect().await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
+        }
+        "connections" => {
+            answer::<ConnectionsRequest, ConnectionsResponse>(body, async |_| {
+                Ok(host
+                    .connections()
+                    .iter()
+                    .map(|c| ConnectionInfo {
+                        handle: c.handle(),
+                        address: c.peer(),
+                        identity: c.identity(),
+                        role: c.role(),
+                        params: c.params(),
+                        security: c.security(),
+                        mtu: c.att_mtu(),
+                    })
+                    .collect())
+            })
+            .await
+        }
         "connection/params" => {
-            let p: ParamsRequest = field(&body, "params")?;
-            Ok(json!(conn(host, &body)?.update_params(p).await.map_err(e)?))
+            answer::<ConnectionParamsRequest, ConnectionParamsResponse>(body, async |q| {
+                conn(host, q.handle)?
+                    .update_params(q.params)
+                    .await
+                    .map_err(e)
+            })
+            .await
         }
         "connection/phy" => {
-            let tx: Vec<Phy> = field(&body, "tx")?;
-            let rx: Vec<Phy> = field(&body, "rx")?;
-            let s8: bool = opt(&body, "coded_s8")?;
-            let p = conn(host, &body)?.set_phy(&tx, &rx, s8).await.map_err(e)?;
-            Ok(json!({"tx": p.0, "rx": p.1}))
+            answer::<ConnectionPhyRequest, ConnectionPhyResponse>(body, async |q| {
+                let (tx, rx) = conn(host, q.handle)?
+                    .set_phy(&q.tx, &q.rx, q.coded_s8)
+                    .await
+                    .map_err(e)?;
+                Ok(PhyData { tx, rx })
+            })
+            .await
         }
         "connection/data_length" => {
-            let o: u16 = field(&body, "tx_octets")?;
-            let t: u16 = field(&body, "tx_time")?;
-            conn(host, &body)?.set_data_length(o, t).await.map(|_| json!({})).map_err(e)
+            answer::<ConnectionDataLengthRequest, ConnectionDataLengthResponse>(body, async |q| {
+                conn(host, q.handle)?
+                    .set_data_length(q.tx_octets, q.tx_time)
+                    .await
+                    .map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
-        "connection/rssi" => Ok(json!({"rssi": conn(host, &body)?.read_rssi().await.map_err(e)?})),
+        "connection/rssi" => {
+            answer::<ConnectionRssiRequest, ConnectionRssiResponse>(body, async |q| {
+                Ok(RssiData {
+                    rssi: conn(host, q.handle)?.read_rssi().await.map_err(e)?,
+                })
+            })
+            .await
+        }
         "gatt/mtu" => {
-            let m: u16 = field(&body, "mtu")?;
-            Ok(json!({"mtu": conn(host, &body)?.gatt().exchange_mtu(m).await.map_err(e)?}))
+            answer::<GattMtuRequest, GattMtuResponse>(body, async |q| {
+                Ok(MtuData {
+                    mtu: conn(host, q.handle)?
+                        .gatt()
+                        .exchange_mtu(q.mtu)
+                        .await
+                        .map_err(e)?,
+                })
+            })
+            .await
         }
-        "gatt/discover" => Ok(json!(conn(host, &body)?.gatt().discover().await.map_err(e)?)),
+        "gatt/discover" => {
+            answer::<GattDiscoverRequest, GattDiscoverResponse>(body, async |q| {
+                conn(host, q.handle)?.gatt().discover().await.map_err(e)
+            })
+            .await
+        }
         "gatt/read" => {
-            let a: u16 = field(&body, "attribute")?;
-            Ok(json!({"value": hex::encode(conn(host, &body)?.gatt().read(a).await.map_err(e)?)}))
+            answer::<GattReadRequest, GattReadResponse>(body, async |q| {
+                let v = conn(host, q.handle)?
+                    .gatt()
+                    .read(q.attribute)
+                    .await
+                    .map_err(e)?;
+                Ok(ValueData {
+                    value: hex::encode(v),
+                })
+            })
+            .await
         }
         "gatt/write" => {
-            let a: u16 = field(&body, "attribute")?;
-            let v = hex_field(&body, "value")?;
-            let without: bool = opt(&body, "without_response")?;
-            let g = conn(host, &body)?.gatt();
-            if without {
-                g.write_without_response(a, &v).await.map_err(e)?;
-            } else {
-                g.write(a, &v).await.map_err(e)?;
-            }
-            Ok(json!({}))
+            answer::<GattWriteRequest, GattWriteResponse>(body, async |q| {
+                let v = unhex("value", &q.value)?;
+                let g = conn(host, q.handle)?.gatt();
+                if q.without_response {
+                    g.write_without_response(q.attribute, &v).await.map_err(e)?;
+                } else {
+                    g.write(q.attribute, &v).await.map_err(e)?;
+                }
+                Ok(Done {})
+            })
+            .await
         }
         "gatt/subscribe" => {
-            let a: u16 = field(&body, "attribute")?;
-            let notify: bool = opt(&body, "notify")?;
-            let indicate: bool = opt(&body, "indicate")?;
-            let g = conn(host, &body)?.gatt();
-            let c = g.characteristic_at(a).await.map_err(e)?;
-            g.subscribe(&c, notify, indicate).await.map(|_| json!({})).map_err(e)
+            answer::<GattSubscribeRequest, GattSubscribeResponse>(body, async |q| {
+                let g = conn(host, q.handle)?.gatt();
+                let c = g.characteristic_at(q.attribute).await.map_err(e)?;
+                g.subscribe(&c, q.notify, q.indicate).await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
-        "pair" => Ok(json!(conn(host, &body)?.pair().await.map_err(e)?)),
-        "secure" => Ok(json!(conn(host, &body)?.secure().await.map_err(e)?)),
+        "pair" => {
+            answer::<PairRequest, PairResponse>(body, async |q| {
+                conn(host, q.handle)?.pair().await.map_err(e)
+            })
+            .await
+        }
+        "secure" => {
+            answer::<SecureRequest, SecureResponse>(body, async |q| {
+                conn(host, q.handle)?.secure().await.map_err(e)
+            })
+            .await
+        }
         "unpair" => {
-            let a: Address = field(&body, "address")?;
-            Ok(json!({"removed": host.keys().remove(&a).map_err(e)?}))
+            answer::<UnpairRequest, UnpairResponse>(body, async |q| {
+                Ok(UnpairData {
+                    removed: host.keys().remove(&q.address).map_err(e)?,
+                })
+            })
+            .await
         }
-        "bonds" => Ok(json!(host
-            .keys()
-            .bonds()
-            .iter()
-            // Never publish keys: only who, and what kind of bond.
-            .map(|b| json!({"identity": b.identity, "label": b.label, "has_ltk": b.ltk.is_some(),
-                "has_irk": b.irk.is_some(), "authenticated": b.authenticated,
-                "secure_connections": b.secure_connections}))
-            .collect::<Vec<_>>())),
+        "bonds" => {
+            answer::<BondsRequest, BondsResponse>(body, async |_| {
+                Ok(host
+                    .keys()
+                    .bonds()
+                    .iter()
+                    // Never publish keys: only who, and what kind of bond.
+                    .map(|b| BondInfo {
+                        identity: b.identity,
+                        label: b.label.clone(),
+                        has_ltk: b.ltk.is_some(),
+                        has_irk: b.irk.is_some(),
+                        authenticated: b.authenticated,
+                        secure_connections: b.secure_connections,
+                    })
+                    .collect())
+            })
+            .await
+        }
         "advertise/start" => {
-            let p: AdvertisingParams = opt(&body, "params")?;
-            let set = host
-                .advertise(&p, &hex_field(&body, "data")?, &hex_field(&body, "scan_response")?)
-                .await
-                .map_err(e)?;
-            Ok(json!({"set": set}))
+            answer::<AdvertiseStartRequest, AdvertiseStartResponse>(body, async |q| {
+                let set = host
+                    .advertise(
+                        &q.params.unwrap_or_default(),
+                        &unhex("data", &q.data)?,
+                        &unhex("scan_response", &q.scan_response)?,
+                    )
+                    .await
+                    .map_err(e)?;
+                Ok(SetData { set })
+            })
+            .await
         }
         "advertise/data" => {
-            let set: u8 = field(&body, "set")?;
-            let sr = body.get("scan_response").map(|_| hex_field(&body, "scan_response")).transpose()?;
-            host.set_advertising_data(set, &hex_field(&body, "data")?, sr.as_deref())
-                .await
-                .map(|_| json!({}))
-                .map_err(e)
+            answer::<AdvertiseDataRequest, AdvertiseDataResponse>(body, async |q| {
+                let sr = q
+                    .scan_response
+                    .as_deref()
+                    .map(|s| unhex("scan_response", s))
+                    .transpose()?;
+                host.set_advertising_data(q.set, &unhex("data", &q.data)?, sr.as_deref())
+                    .await
+                    .map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
         "advertise/stop" => {
-            let set: u8 = field(&body, "set")?;
-            host.stop_advertising(set).await.map(|_| json!({})).map_err(e)
+            answer::<AdvertiseStopRequest, AdvertiseStopResponse>(body, async |q| {
+                host.stop_advertising(q.set).await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
         "periodic/start" => {
-            let set: u8 = field(&body, "set")?;
-            let p: PeriodicParams = opt(&body, "params")?;
-            host.start_periodic(set, &p, &hex_field(&body, "data")?)
+            answer::<PeriodicStartRequest, PeriodicStartResponse>(body, async |q| {
+                host.start_periodic(
+                    q.set,
+                    &q.params.unwrap_or_default(),
+                    &unhex("data", &q.data)?,
+                )
                 .await
-                .map(|_| json!({}))
-                .map_err(e)
+                .map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
         "periodic/stop" => {
-            let set: u8 = field(&body, "set")?;
-            host.stop_periodic(set).await.map(|_| json!({})).map_err(e)
+            answer::<PeriodicStopRequest, PeriodicStopResponse>(body, async |q| {
+                host.stop_periodic(q.set).await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
         "periodic/sync" => {
-            let a: Address = field(&body, "address")?;
-            let sid: u8 = field(&body, "sid")?;
-            let skip: u16 = opt(&body, "skip")?;
-            let timeout: Option<u32> = opt(&body, "timeout_ms")?;
-            let s = host.sync_periodic(a, sid, skip, timeout.unwrap_or(5000)).await.map_err(e)?;
-            Ok(json!({"sync": s}))
+            answer::<PeriodicSyncRequest, PeriodicSyncResponse>(body, async |q| {
+                let sync = host
+                    .sync_periodic(q.address, q.sid, q.skip, q.timeout_ms.unwrap_or(5000))
+                    .await
+                    .map_err(e)?;
+                Ok(SyncData { sync })
+            })
+            .await
         }
         "periodic/terminate" => {
-            let s: u16 = field(&body, "sync")?;
-            host.terminate_sync(s).await.map(|_| json!({})).map_err(e)
+            answer::<PeriodicTerminateRequest, PeriodicTerminateResponse>(body, async |q| {
+                host.terminate_sync(q.sync).await.map_err(e)?;
+                Ok(Done {})
+            })
+            .await
         }
         "server/add" => {
-            let s: ServiceDef = field(&body, "service")?;
-            Ok(json!(host.gatt_server().add(&s).await.map_err(e)?))
+            answer::<ServerAddRequest, ServerAddResponse>(body, async |q| {
+                host.gatt_server().add(&q.service).await.map_err(e)
+            })
+            .await
         }
         "server/set" => {
-            let a: u16 = field(&body, "attribute")?;
-            let v = hex_field(&body, "value")?;
-            let notify: bool = opt(&body, "notify")?;
-            let server = host.gatt_server();
-            if notify {
-                Ok(json!({"notified": server.notify(a, &v).await.map_err(e)?}))
-            } else {
-                server.set(a, &v).map(|_| json!({})).map_err(e)
-            }
+            answer::<ServerSetRequest, ServerSetResponse>(body, async |q| {
+                let v = unhex("value", &q.value)?;
+                let server = host.gatt_server();
+                if q.notify {
+                    Ok(ServerSetData {
+                        notified: Some(server.notify(q.attribute, &v).await.map_err(e)?),
+                    })
+                } else {
+                    server.set(q.attribute, &v).map_err(e)?;
+                    Ok(ServerSetData::default())
+                }
+            })
+            .await
         }
         "server/get" => {
-            let a: u16 = field(&body, "attribute")?;
-            Ok(json!({"value": host.gatt_server().value(a).map(hex::encode)}))
+            answer::<ServerGetRequest, ServerGetResponse>(body, async |q| {
+                Ok(ServerValueData {
+                    value: host.gatt_server().value(q.attribute).map(hex::encode),
+                })
+            })
+            .await
         }
-        other => Err(format!("unknown request {other:?}")),
+        other => {
+            let r = ErrorResponse::new(format!("unknown request {other:?}"), transaction(body));
+            serde_json::to_vec(&r).unwrap_or_default()
+        }
     }
 }
 

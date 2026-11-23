@@ -110,10 +110,12 @@ pub mod le_feature {
 
 /// The controller's identity and capabilities.
 #[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Capabilities {
     /// The public address, least significant byte first; all zeros when the
     /// controller has none.
     #[serde(serialize_with = "ser_addr")]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub public_address: [u8; 6],
     /// HCI version (a Core Specification version number).
     pub hci_version: u8,

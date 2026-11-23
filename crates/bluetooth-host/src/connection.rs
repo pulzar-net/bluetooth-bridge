@@ -25,6 +25,7 @@ use crate::{att, l2cap, smp};
 
 /// Which end of the connection we are.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Role {
     /// We initiated it.
@@ -58,6 +59,7 @@ impl Phy {
 
 /// How secure the link is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Security {
     /// The link is encrypted.
     pub encrypted: bool,
@@ -90,6 +92,7 @@ impl Security {
 
 /// Connection parameters, in controller units.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ConnParams {
     /// Interval, 1.25 ms units.
     pub interval: u16,
@@ -101,6 +104,7 @@ pub struct ConnParams {
 
 /// Parameters to ask for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ParamsRequest {
     /// Minimum interval, 1.25 ms units (6 to 3200).
     pub interval_min: u16,
@@ -143,6 +147,7 @@ impl ParamsRequest {
 
 /// Data length in use.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct DataLength {
     /// Maximum transmit payload, octets.
     pub tx_octets: u16,

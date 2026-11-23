@@ -12,6 +12,7 @@ pub const COMPANY_ID: u16 = 0x004c;
 /// An iBeacon frame.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IBeacon {
     /// Proximity UUID.
     pub uuid: Uuid,

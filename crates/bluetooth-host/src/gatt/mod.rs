@@ -50,6 +50,7 @@ pub mod uuid {
 
 /// Characteristic properties (the declaration's bit field).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(transparent)]
 pub struct Properties(pub u8);
 
@@ -115,6 +116,7 @@ impl Properties {
 
 /// A service on a peer's server.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Service {
     /// Its UUID.
     pub uuid: Uuid,
@@ -133,6 +135,7 @@ pub struct Service {
 
 /// A characteristic on a peer's server.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Characteristic {
     /// Its UUID.
     pub uuid: Uuid,
@@ -163,6 +166,7 @@ impl Characteristic {
 
 /// A descriptor on a peer's server.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Descriptor {
     /// Its UUID.
     pub uuid: Uuid,

@@ -175,6 +175,21 @@ impl serde::Serialize for Uuid {
     }
 }
 
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Uuid {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        "Uuid".into()
+    }
+
+    fn json_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "description": "A UUID: four hex digits for a 16-bit one (`180f`), eight for 32-bit, or the full 128-bit form (`0000180f-0000-1000-8000-00805f9b34fb`).",
+            "examples": ["180f", "6e400001-b5a3-f393-e0a9-e50e24dcca9e"]
+        })
+    }
+}
+
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Uuid {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {

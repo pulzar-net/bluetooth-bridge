@@ -17,6 +17,7 @@ pub const SERVICE_UUID: u16 = 0xfeaa;
     derive(Serialize),
     serde(tag = "frame", rename_all = "snake_case")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Eddystone {
     /// Eddystone-UID (0x00).
     Uid {
@@ -24,9 +25,11 @@ pub enum Eddystone {
         tx_power: i8,
         /// 10-byte namespace.
         #[cfg_attr(feature = "serde", serde(serialize_with = "crate::ad::ser_hex"))]
+        #[cfg_attr(feature = "schema", schemars(with = "String"))]
         namespace: [u8; 10],
         /// 6-byte instance.
         #[cfg_attr(feature = "serde", serde(serialize_with = "crate::ad::ser_hex"))]
+        #[cfg_attr(feature = "schema", schemars(with = "String"))]
         instance: [u8; 6],
     },
     /// Eddystone-URL (0x10).
@@ -51,6 +54,7 @@ pub enum Eddystone {
     EncryptedTlm {
         /// The encrypted telemetry.
         #[cfg_attr(feature = "serde", serde(serialize_with = "crate::ad::ser_hex"))]
+        #[cfg_attr(feature = "schema", schemars(with = "String"))]
         etlm: [u8; 12],
         /// Salt.
         salt: u16,
@@ -63,6 +67,7 @@ pub enum Eddystone {
         tx_power: i8,
         /// The 8-byte ephemeral identifier.
         #[cfg_attr(feature = "serde", serde(serialize_with = "crate::ad::ser_hex"))]
+        #[cfg_attr(feature = "schema", schemars(with = "String"))]
         eid: [u8; 8],
     },
 }

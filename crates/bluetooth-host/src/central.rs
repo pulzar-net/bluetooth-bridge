@@ -17,6 +17,7 @@ use crate::host::Host;
 
 /// How to connect.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default)]
 pub struct ConnectParams {
     /// Scan interval while initiating, ms.

@@ -7,17 +7,16 @@ The bridge publishes and listens under one base topic, `bluetooth` unless
 `mqtt.base_topic` says otherwise. Every payload is JSON. This page uses the
 default base topic throughout.
 
-## Topics at a glance
+This page explains how the topics work together. The
+[MQTT reference](/bluetooth-bridge/mqtt-reference.html) lists every topic with its QoS, retain flag and
+payload schema, field by field. It is generated from the bridge's own types,
+so it always matches the code.
 
-| Topic | Direction | Retained | What |
-|---|---|---|---|
-| `bluetooth/bridge/state` | out | yes | `{"state":"online"}` or `{"state":"offline"}` |
-| `bluetooth/bridge/info` | out | yes | the controller, its version and features |
-| `bluetooth/scan/<ADDRESS>` | out | no | an advertisement, fully parsed |
-| `bluetooth/device/<ADDRESS>` | out | no | a sensor's decoded readings |
-| `bluetooth/bridge/event` | out | no | connections, pairing, notifications, GATT server writes, periodic reports |
-| `bluetooth/bridge/request/<op>` | in | | a request |
-| `bluetooth/bridge/response/<op>` | out | no | its answer |
+Bridge topics are `bluetooth/bridge/state`, `info` and `event`, with
+requests and responses under `bluetooth/bridge/request/<op>` and
+`bluetooth/bridge/response/<op>`. Each device has `bluetooth/scan/<ADDRESS>`
+for its advertisements and, when they carry readings,
+`bluetooth/device/<ADDRESS>`. The mesh has `bluetooth/mesh/event`.
 
 `<ADDRESS>` in a topic is the address as twelve upper-case hex digits, most
 significant first: `F12233445566` for `F1:22:33:44:55:66`. When a private
@@ -51,7 +50,7 @@ Keys are never published.
 }
 ```
 
-Features the controller lacks are simply not used: scanning without coded
+Every field is described in the [MQTT reference](/bluetooth-bridge/mqtt-reference.html). Features the controller lacks are simply not used: scanning without coded
 PHY, legacy advertising without extended sets, and so on.
 
 ## `scan/<ADDRESS>`
@@ -87,7 +86,8 @@ Other fields appear when they apply: `identity` (a resolved private
 address), `tx_power`, `primary_phy` and `secondary_phy`, `sid` (extended
 advertising set), and every other AD type the advertisement carries, named
 from the Bluetooth SIG's assigned numbers. `data` is the raw advertising
-data in hex. Turn the topic off with `scan.publish_reports = false`.
+data in hex. Turn the topic off with `scan.publish_reports = false`. The
+[MQTT reference](/bluetooth-bridge/mqtt-reference.html) has every field, and each beacon format's.
 
 ## `device/<ADDRESS>`
 
@@ -115,90 +115,72 @@ Add a `transaction` value to a request to have it copied into the response.
 Requests that wait for the radio (connecting, reading, pairing) run
 alongside each other and scanning.
 
+An empty payload is the same as `{}`. A request of the wrong shape, such as
+a string where a number belongs, gets an error response that names the
+problem. Each request's fields and its response are in the
+[MQTT reference](/bluetooth-bridge/mqtt-reference.html); what follows says what each group does.
+
 ### Scanning
 
-| Op | Fields | Data |
-|---|---|---|
-| `scan/start` | `config`: the [`[scan]` keys](/bluetooth-bridge/config-reference.html) other than `enabled`, `allow`, `min_rssi`, `publish_reports` | |
-| `scan/stop` | | |
+`scan/start` starts scanning, or restarts it with another `config`: the
+[`[scan]` keys](/bluetooth-bridge/config-reference.html) other than `enabled`, `allow`, `min_rssi`
+and `publish_reports`. `scan/stop` stops it.
 
 ### Connections
 
-| Op | Fields | Data |
-|---|---|---|
-| `connect` | `address`, `params` (optional: `scan_interval_ms`, `scan_window_ms`, `timeout_ms`, `phys`, and `params` for the connection interval, latency and supervision timeout) | `handle`, `params` |
-| `disconnect` | `handle` | |
-| `connections` | | each: `handle`, `address`, `identity`, `role`, `params`, `security`, `mtu` |
-| `connection/params` | `handle`, `params` | the parameters agreed |
-| `connection/phy` | `handle`, `tx`, `rx` (lists of `le1m`, `le2m`, `le_coded`), `coded_s8` | `tx`, `rx` |
-| `connection/data_length` | `handle`, `tx_octets`, `tx_time` | |
-| `connection/rssi` | `handle` | `rssi` |
+`connect` connects to an `address` as central, with optional connection
+`params`, and answers with the connection's `handle`, which every request
+on it names. `disconnect` closes it, and `connections` lists the open ones.
+`connection/params`, `connection/phy` (`le1m`, `le2m`, `le_coded`) and
+`connection/data_length` change a connection, and `connection/rssi` reads
+its signal strength.
 
 ### GATT client
 
-| Op | Fields | Data |
-|---|---|---|
-| `gatt/mtu` | `handle`, `mtu` | `mtu` |
-| `gatt/discover` | `handle` | services, characteristics and descriptors with their handles |
-| `gatt/read` | `handle`, `attribute` | `value` (hex) |
-| `gatt/write` | `handle`, `attribute`, `value` (hex), `without_response` | |
-| `gatt/subscribe` | `handle`, `attribute` (the characteristic's value handle), `notify`, `indicate` | |
-
-Notifications and indications arrive as `notification` events.
+`gatt/mtu` exchanges the ATT MTU, and `gatt/discover` lists a peer's
+services, characteristics and descriptors with their handles. `gatt/read`
+and `gatt/write` take an `attribute` handle and hex values; `gatt/subscribe`
+takes a characteristic's value handle, and its notifications and
+indications then arrive as `notification` events.
 
 ### Security
 
-| Op | Fields | Data |
-|---|---|---|
-| `pair` | `handle` | the security reached |
-| `secure` | `handle`: encrypt with the stored bond, or pair | the security reached |
-| `bonds` | | each: `identity`, `label`, `has_ltk`, `has_irk`, `authenticated`, `secure_connections` (never the keys) |
-| `unpair` | `address` | `removed` |
+`pair` pairs with a peer, and `secure` encrypts the link with the stored
+bond, pairing when there is none; both answer with the security reached.
+`bonds` lists the stored bonds, never their keys, and `unpair` forgets one.
 
 ### Advertising
 
-| Op | Fields | Data |
-|---|---|---|
-| `advertise/start` | `params` (as in [`[[advertising]]`](/bluetooth-bridge/config-reference.html)), `data`, `scan_response` (hex AD structures) | `set` |
-| `advertise/data` | `set`, `data`, `scan_response` | |
-| `advertise/stop` | `set` | |
-| `periodic/start` | `set`, `params`, `data` | |
-| `periodic/stop` | `set` | |
-| `periodic/sync` | `address`, `sid`, `skip`, `timeout_ms` (default 5000) | `sync` |
-| `periodic/terminate` | `sync` | |
+`advertise/start` starts a set with `params` as in
+[`[[advertising]]`](/bluetooth-bridge/config-reference.html) and hex AD structures, and answers with
+the set's handle; `advertise/data` and `advertise/stop` change and stop it.
+`periodic/start` and `periodic/stop` run a periodic train on an extended
+set. `periodic/sync` follows another device's train, whose reports then
+arrive as `periodic_report` events, until `periodic/terminate`.
 
 ### GATT server
 
-| Op | Fields | Data |
-|---|---|---|
-| `server/add` | `service`: a service definition, as in [`[[gatt_services]]`](/bluetooth-bridge/config-reference.html) | the handles of the service, its characteristics and descriptors |
-| `server/set` | `attribute`, `value` (hex), `notify` | `notified` (how many clients), when `notify` |
-| `server/get` | `attribute` | `value` |
+`server/add` adds a service, defined as in
+[`[[gatt_services]]`](/bluetooth-bridge/config-reference.html), and answers with its handles.
+`server/set` sets a value, notifying subscribed clients with `notify`, and
+`server/get` reads one.
 
 ### Other
 
-| Op | Data |
-|---|---|
-| `info` | `address`, `controller`, `le_features`, as in `bridge/info` |
+`info` answers with the controller, as in `bridge/info`.
 
 ## Events
 
-On `bluetooth/bridge/event`, each with a `type`:
+On `bluetooth/bridge/event`, `type` names the event: `connected`,
+`disconnected`, `paired`, `pairing_failed`, `notification`, `connection` (a
+parameter, PHY or data length change), `gatt_write` and `gatt_subscription`
+(a client of the bridge's GATT server), `periodic_report`,
+`periodic_sync_lost`, `advertising_stopped` and `scan_request`. The
+[MQTT reference](/bluetooth-bridge/mqtt-reference.html) has each event's fields.
 
-| `type` | Fields |
-|---|---|
-| `connected` | `handle`, `address`, and the connection's role and parameters |
-| `disconnected` | `handle`, `address`, `reason` |
-| `paired` | `handle`, `identity`, `bonded`, `security` |
-| `pairing_failed` | `handle`, `reason` |
-| `notification` | `handle`, `attribute`, `value` (hex), and whether it was an indication |
-| `connection` | `handle`, `change`: a parameter, PHY or data length change |
-| `gatt_write` | `handle`, `attribute`, `value`: a client wrote to the bridge's GATT server |
-| `gatt_subscription` | `handle`, `attribute`, `notify`, `indicate` |
-| `periodic_report` | `report` (with its data parsed), from a synchronized train |
-| `periodic_sync_lost` | `sync` |
-| `advertising_stopped` | `set`, `connection` (when a central connected) |
-| `scan_request` | `set`, `scanner` |
+```json
+{ "type": "notification", "handle": 64, "attribute": 42, "value": "6869", "indication": false }
+```
 
 ## Bluetooth Mesh
 
@@ -207,17 +189,15 @@ a mesh network of its own, kept in `<data dir>/mesh`, over the advertising
 bearer. Requests go to `bluetooth/bridge/request/mesh/<op>` and answers come
 on `bluetooth/bridge/response/mesh/<op>`:
 
-| Op | Fields | Data |
-|---|---|---|
-| `mesh/network` | | the bridge's address, the IV index, and the nodes |
-| `mesh/unprovisioned` | | unprovisioned device beacons heard, newest first |
-| `mesh/provision` | `uuid`, optional `static_oob` | the new node |
-| `mesh/configure` | `address` | the node's Composition Data |
-| `mesh/onoff` | `address`, `on` | |
+`mesh/network` shows the network and the nodes the bridge provisioned, and
+`mesh/unprovisioned` the device beacons heard, newest first.
+`mesh/provision` provisions one by its `uuid`, with its `static_oob` if it
+has one; `mesh/configure` gives a node the application key, binds its
+models and reads its Composition Data; `mesh/onoff` switches its Generic
+OnOff server.
 
-Events come on `bluetooth/mesh/event`: `{"type": "unprovisioned", "uuid", "oob_info"}`
-for a new device beacon, and `{"type": "message", "src", "dst", "opcode", "params"}`
-for each access message. Mesh advertisements are not published as `scan/`
+Events come on `bluetooth/mesh/event`: `unprovisioned` for a new device
+beacon, and `message` for each access message. Mesh advertisements are not published as `scan/`
 reports, and the bridge adds the Mesh AD types to `scan.always_report` so
 duplicate filtering never drops them.
 

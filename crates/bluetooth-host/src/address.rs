@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// Public or random.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum AddressType {
     /// An IEEE-assigned public address.
@@ -150,6 +151,21 @@ impl FromStr for Address {
 impl Serialize for Address {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.collect_str(&format_args!("{self:?}"))
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Address {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        "Address".into()
+    }
+
+    fn json_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "description": "A device address, most significant octet first, with its type: `C0:11:22:33:44:55/random` or `BC:57:29:00:00:01/public`. Read without the suffix, an address is public.",
+            "examples": ["BC:57:29:00:00:01/public", "C0:11:22:33:44:55/random"]
+        })
     }
 }
 

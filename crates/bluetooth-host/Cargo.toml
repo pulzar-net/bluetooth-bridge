@@ -22,8 +22,9 @@ serial = ["dep:tokio-serial"]
 ## Entry points for the fuzz targets.
 fuzzing = []
 ## JSON Schema for the types a configuration file holds (scan, advertising,
-## GATT service definitions), for the bridge's generated configuration reference.
-schema = ["dep:schemars"]
+## GATT service definitions) and the serialized results (reports, connections,
+## GATT discovery), for the bridge's generated configuration and MQTT references.
+schema = ["dep:schemars", "bluetooth-adv/schema"]
 
 [dependencies]
 bluetooth-adv.workspace = true

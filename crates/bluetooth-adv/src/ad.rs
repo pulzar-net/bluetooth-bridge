@@ -51,6 +51,7 @@ impl AdStructure<'_> {
 /// Where an advertisement stopped making sense.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Malformed {
     /// Offset of the structure whose length runs past the end of the data.
     pub offset: usize,
@@ -110,6 +111,7 @@ impl<'a> Iterator for AdStructures<'a> {
 /// The Flags AD type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Flags {
     /// The raw octet.
     pub raw: u8,
@@ -138,6 +140,7 @@ impl From<u8> for Flags {
 /// A service UUID listed in the advertisement.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ServiceUuid {
     /// The UUID.
     pub uuid: Uuid,
@@ -151,6 +154,7 @@ pub struct ServiceUuid {
 /// The device's local name.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LocalName {
     /// The name, with invalid UTF-8 replaced.
     pub name: String,
@@ -161,6 +165,7 @@ pub struct LocalName {
 /// Service data: a UUID and the bytes the service defines.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ServiceData {
     /// The service UUID.
     pub uuid: Uuid,
@@ -169,12 +174,14 @@ pub struct ServiceData {
     pub name: Option<&'static str>,
     /// The data.
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_hex"))]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub data: Vec<u8>,
 }
 
 /// Manufacturer specific data: a company identifier and the company's bytes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ManufacturerData {
     /// The Company Identifier.
     pub company_id: u16,
@@ -183,12 +190,14 @@ pub struct ManufacturerData {
     pub company: Option<&'static str>,
     /// The data after the identifier.
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_hex"))]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub data: Vec<u8>,
 }
 
 /// The Device ID AD type (EIR): who made the device and which product it is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct DeviceId {
     /// 1: Bluetooth SIG company identifier, 2: USB Implementer's Forum vendor id.
     pub vendor_id_source: u16,
@@ -205,6 +214,7 @@ pub struct DeviceId {
 /// assigned yet.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct RawAd {
     /// The AD type.
     pub ad_type: u8,
@@ -213,6 +223,7 @@ pub struct RawAd {
     pub name: Option<&'static str>,
     /// The data.
     #[cfg_attr(feature = "serde", serde(serialize_with = "ser_hex"))]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub data: Vec<u8>,
 }
 
@@ -223,6 +234,7 @@ pub struct RawAd {
 /// instead, so nothing the device sent is lost.
 #[derive(Debug, Clone, Default, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub struct Advertisement {
     /// Flags.
@@ -272,12 +284,14 @@ pub struct Advertisement {
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", serialize_with = "ser_addrs")
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Vec<String>"))]
     pub public_target_addresses: Vec<AddressBytes>,
     /// Random Target Addresses.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", serialize_with = "ser_addrs")
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Vec<String>"))]
     pub random_target_addresses: Vec<AddressBytes>,
     /// LE Bluetooth Device Address: the address, and whether it is random.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -297,6 +311,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub le_supported_features: Option<Vec<u8>>,
     /// Resolvable Set Identifier (Coordinated Set Identification).
     #[cfg_attr(
@@ -306,6 +321,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub resolvable_set_identifier: Option<[u8; 6]>,
     /// Security Manager TK Value (legacy OOB pairing).
     #[cfg_attr(
@@ -315,6 +331,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub sm_tk: Option<[u8; 16]>,
     /// Security Manager Out of Band Flags.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -327,6 +344,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub le_sc_confirmation: Option<[u8; 16]>,
     /// LE Secure Connections Random Value (OOB).
     #[cfg_attr(
@@ -336,6 +354,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub le_sc_random: Option<[u8; 16]>,
     /// Simple Pairing Hash C-192 or C-256 (BR/EDR OOB), the last one seen.
     #[cfg_attr(
@@ -345,6 +364,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub ssp_hash: Option<[u8; 16]>,
     /// Simple Pairing Randomizer R-192 or R-256, the last one seen.
     #[cfg_attr(
@@ -354,6 +374,7 @@ pub struct Advertisement {
             serialize_with = "ser_hex_opt"
         )
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub ssp_randomizer: Option<[u8; 16]>,
     /// Every other structure, by type, with its SIG name: Mesh, BIGInfo,
     /// Indoor Positioning, Transport Discovery, Encrypted Advertising Data,

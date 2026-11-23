@@ -30,6 +30,7 @@ pub const COMPANY_ID: u16 = 0x0a53;
 /// A KKM frame.
 #[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Kkm {
     /// `sensor` or `system`.
     pub frame: &'static str,

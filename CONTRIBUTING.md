@@ -76,6 +76,40 @@ cargo run -p bluetooth-bridge -- --config my-test.toml   # [adapter] transport =
 [Getting started](https://oss.pulzr.net/bluetooth-bridge/getting-started.html)
 walks through it with an MQTT broker.
 
+## The MQTT reference
+
+The [MQTT reference](https://oss.pulzr.net/bluetooth-bridge/mqtt-reference.html)
+is an AsyncAPI 3.0 description generated from the bridge's payload types, in
+the pattern zigbee-bridge's
+[CONTRIBUTING](https://github.com/pulzar-net/zigbee-bridge/blob/main/CONTRIBUTING.md#the-mqtt-reference)
+describes:
+
+- Every payload is a type in `crates/bluetooth-bridge/src/api.rs`, and the
+  bridge serializes those types and never builds JSON by hand. Payloads
+  that embed the stack's own types (reports, advertisements, beacons,
+  GATT discovery) take them from `bluetooth-host` and `bluetooth-adv`, whose
+  `schema` feature derives their JSON Schemas.
+- The derives sit behind the non-default `unstable-asyncapi-docs` feature,
+  with every `#[asyncapi(...)]` and `#[schemars(...)]` attribute inside
+  `cfg_attr`. CI fails if any crate's default build pulls in `asyncapi-rust`
+  or `schemars`.
+- Doc comments are the descriptions. Name tagged-enum variants one by one
+  with `#[serde(rename = "...")]`, and give each a summary.
+- `crates/bluetooth-bridge/tests/asyncapi.rs` holds the channels and
+  operations, and fails if `docs/public/asyncapi.json` is stale. Regenerate
+  it with
+
+  ```sh
+  UPDATE_DOCS=1 cargo test -p bluetooth-bridge --features unstable-asyncapi-docs --test asyncapi
+  ```
+
+  A new request needs a request and a response type in `api.rs`, its arm in
+  `bridge.rs`, and its two channels and operations in the test.
+- The docs workflow runs that test and the AsyncAPI validator. The
+  workspace pins the unpublished `pulzar-net/asyncapi-rust` fork with
+  `[patch.crates-io]` until an asyncapi-rust release has what the reference
+  uses; `cargo publish` ignores the patch.
+
 ## Fuzz
 
 Every parser of bytes from the air or the controller has a fuzz target in

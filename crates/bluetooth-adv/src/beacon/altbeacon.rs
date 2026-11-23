@@ -10,11 +10,13 @@ use serde::Serialize;
 /// An AltBeacon frame.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct AltBeacon {
     /// The advertiser's company identifier.
     pub company_id: u16,
     /// Beacon id: by convention a 16-byte organisational unit then 4 bytes.
     #[cfg_attr(feature = "serde", serde(serialize_with = "crate::ad::ser_hex"))]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub beacon_id: [u8; 20],
     /// Average RSSI at one metre, dBm.
     pub reference_rssi: i8,

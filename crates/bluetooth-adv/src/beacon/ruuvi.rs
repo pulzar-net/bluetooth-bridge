@@ -18,6 +18,7 @@ pub const COMPANY_ID: u16 = 0x0499;
 /// A Ruuvi frame's values, in SI-ish units.
 #[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Ruuvi {
     /// Temperature, °C.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]

@@ -84,6 +84,7 @@ impl Default for ScanConfig {
 
 /// One advertisement, with its scan response when one came.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Report {
     /// The address it was sent from.
     pub address: Address,
@@ -120,18 +121,21 @@ pub struct Report {
     pub direct_address: Option<Address>,
     /// Advertising data.
     #[serde(serialize_with = "ser_hex")]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub data: Vec<u8>,
     /// Scan response data.
     #[serde(
         skip_serializing_if = "Option::is_none",
         serialize_with = "ser_hex_opt"
     )]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<String>"))]
     pub scan_response: Option<Vec<u8>>,
     /// The controller could not deliver all of the data.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub truncated: bool,
     /// When it was received.
     #[serde(serialize_with = "ser_time")]
+    #[cfg_attr(feature = "schema", schemars(with = "u64"))]
     pub time: SystemTime,
 }
 
@@ -175,6 +179,7 @@ impl Report {
 
 /// A report from a synchronized periodic advertising train.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PeriodicReport {
     /// The sync handle.
     pub sync: u16,
@@ -189,6 +194,7 @@ pub struct PeriodicReport {
     pub tx_power: Option<i8>,
     /// The data.
     #[serde(serialize_with = "ser_hex")]
+    #[cfg_attr(feature = "schema", schemars(with = "String"))]
     pub data: Vec<u8>,
     /// The controller could not deliver all of it.
     #[serde(skip_serializing_if = "std::ops::Not::not")]

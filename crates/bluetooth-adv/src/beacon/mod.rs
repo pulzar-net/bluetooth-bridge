@@ -56,6 +56,7 @@ impl Context {
     derive(Serialize),
     serde(tag = "format", rename_all = "snake_case")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub enum Beacon {
     /// Apple iBeacon.
@@ -101,6 +102,7 @@ impl Beacon {
 /// One measurement from a sensor frame.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Reading {
     /// A stable snake_case key, unique within the frame (`temperature`,
     /// `button_2`, ...).

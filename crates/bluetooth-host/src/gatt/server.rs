@@ -141,6 +141,7 @@ mod hex_bytes {
 
 /// The handles of an added service.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ServiceHandles {
     /// The service declaration.
     pub start: u16,

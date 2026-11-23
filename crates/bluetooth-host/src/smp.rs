@@ -135,6 +135,7 @@ impl IoCapability {
 
 /// How the two devices authenticate each other.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum Method {
     /// No authentication (no MITM protection).

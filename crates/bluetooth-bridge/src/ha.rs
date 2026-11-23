@@ -1,7 +1,7 @@
 //! Home Assistant MQTT discovery for devices whose advertisements decode to
 //! readings (BTHome, KKM, Ruuvi, Eddystone TLM).
 
-use serde_json::{json, Value};
+use crate::api::{DiscoveryConfig, DiscoveryDevice};
 
 /// BTHome's binary states, which become binary sensors.
 const BINARY: &[(&str, &str)] = &[
@@ -85,7 +85,7 @@ pub fn entity(
     manufacturer: Option<&str>,
     key: &str,
     unit: &str,
-) -> (String, Value) {
+) -> (String, DiscoveryConfig) {
     let binary = BINARY.iter().find(|(k, _)| *k == key);
     let component = if binary.is_some() {
         "binary_sensor"
@@ -93,47 +93,48 @@ pub fn entity(
         "sensor"
     };
     let object = format!("bluetooth_{}_{key}", device_id.to_lowercase());
-    let mut c = json!({
-        "name": key.replace('_', " "),
-        "unique_id": object,
-        "object_id": object,
-        "state_topic": format!("{base}/device/{device_id}"),
-        "availability_topic": crate::mqtt::state_topic(base),
-        "availability_template": "{{ value_json.state }}",
-        "device": {
-            "identifiers": [format!("bluetooth_{}", device_id.to_lowercase())],
-            "connections": [["bluetooth", device_id_to_mac(device_id)]],
-            "name": device_name,
-            "model": model,
-            "via_device": bridge_id(base),
+    let mut c = DiscoveryConfig {
+        name: key.replace('_', " "),
+        unique_id: object.clone(),
+        object_id: Some(object),
+        state_topic: format!("{base}/device/{device_id}"),
+        availability_topic: Some(crate::mqtt::state_topic(base)),
+        availability_template: Some("{{ value_json.state }}".into()),
+        device: DiscoveryDevice {
+            identifiers: vec![format!("bluetooth_{}", device_id.to_lowercase())],
+            connections: vec![("bluetooth".into(), device_id_to_mac(device_id))],
+            name: device_name.into(),
+            model: model.into(),
+            manufacturer: manufacturer.map(str::to_string),
+            via_device: Some(bridge_id(base)),
+            ..DiscoveryDevice::default()
         },
-    });
-    if let Some(m) = manufacturer {
-        c["device"]["manufacturer"] = json!(m);
-    }
+        ..DiscoveryConfig::default()
+    };
     match binary {
         Some((_, class)) => {
-            c["value_template"] = json!(format!("{{{{ 'ON' if value_json.{key} else 'OFF' }}}}"));
+            c.value_template = format!("{{{{ 'ON' if value_json.{key} else 'OFF' }}}}");
             if !class.is_empty() {
-                c["device_class"] = json!(class);
+                c.device_class = Some(class.to_string());
             }
         }
         None => {
-            c["value_template"] = json!(format!("{{{{ value_json.{key} }}}}"));
+            c.value_template = format!("{{{{ value_json.{key} }}}}");
             if !unit.is_empty() {
-                c["unit_of_measurement"] = json!(unit);
+                c.unit_of_measurement = Some(unit.into());
             }
-            if let Some(class) = device_class(key, unit) {
-                c["device_class"] = json!(class);
-            }
-            c["state_class"] = json!(if is_cumulative(key) {
-                "total_increasing"
-            } else {
-                "measurement"
-            });
+            c.device_class = device_class(key, unit).map(str::to_string);
+            c.state_class = Some(
+                if is_cumulative(key) {
+                    "total_increasing"
+                } else {
+                    "measurement"
+                }
+                .into(),
+            );
             if key == "rssi" {
-                c["entity_category"] = json!("diagnostic");
-                c["enabled_by_default"] = json!(false);
+                c.entity_category = Some("diagnostic".into());
+                c.enabled_by_default = Some(false);
             }
         }
     }
@@ -169,24 +170,30 @@ pub fn bridge_id(base: &str) -> String {
 }
 
 /// The bridge itself, as a device the sensors come through.
-pub fn bridge_device(prefix: &str, base: &str, version: &str) -> (String, Value) {
+pub fn bridge_device(prefix: &str, base: &str, version: &str) -> (String, DiscoveryConfig) {
     let id = bridge_id(base);
     (
         format!("{prefix}/binary_sensor/{id}/connection_state/config"),
-        json!({
-            "name": "connection state",
-            "unique_id": format!("{id}_connection_state"),
-            "state_topic": crate::mqtt::state_topic(base),
-            "value_template": "{{ 'ON' if value_json.state == 'online' else 'OFF' }}",
-            "device_class": "connectivity",
-            "entity_category": "diagnostic",
-            "device": {
-                "identifiers": [id],
-                "name": if base == "bluetooth" { "Bluetooth bridge".to_string() } else { format!("Bluetooth bridge {base}") },
-                "model": "bluetooth-bridge",
-                "sw_version": version,
+        DiscoveryConfig {
+            name: "connection state".into(),
+            unique_id: format!("{id}_connection_state"),
+            state_topic: crate::mqtt::state_topic(base),
+            value_template: "{{ 'ON' if value_json.state == 'online' else 'OFF' }}".into(),
+            device_class: Some("connectivity".into()),
+            entity_category: Some("diagnostic".into()),
+            device: DiscoveryDevice {
+                identifiers: vec![id],
+                name: if base == "bluetooth" {
+                    "Bluetooth bridge".to_string()
+                } else {
+                    format!("Bluetooth bridge {base}")
+                },
+                model: "bluetooth-bridge".into(),
+                sw_version: Some(version.into()),
+                ..DiscoveryDevice::default()
             },
-        }),
+            ..DiscoveryConfig::default()
+        },
     )
 }
 
@@ -215,8 +222,8 @@ mod tests {
             t2,
             "homeassistant/binary_sensor/bluetooth_bridge_bluetooth_garage/connection_state/config"
         );
-        assert_ne!(c1["unique_id"], c2["unique_id"]);
-        assert_ne!(c1["device"]["identifiers"], c2["device"]["identifiers"]);
+        assert_ne!(c1.unique_id, c2.unique_id);
+        assert_ne!(c1.device.identifiers, c2.device.identifiers);
         let (_, s) = entity(
             "homeassistant",
             "bluetooth/garage",
@@ -227,7 +234,10 @@ mod tests {
             "temperature",
             "°C",
         );
-        assert_eq!(s["device"]["via_device"], c2["device"]["identifiers"][0]);
+        assert_eq!(
+            s.device.via_device.as_ref(),
+            Some(&c2.device.identifiers[0])
+        );
     }
 
     #[test]
@@ -246,10 +256,10 @@ mod tests {
             t,
             "homeassistant/sensor/bluetooth_a4c138000001/temperature/config"
         );
-        assert_eq!(c["device_class"], "temperature");
-        assert_eq!(c["state_topic"], "bluetooth/device/A4C138000001");
-        assert_eq!(c["value_template"], "{{ value_json.temperature }}");
-        assert_eq!(c["device"]["connections"][0][1], "A4:C1:38:00:00:01");
+        assert_eq!(c.device_class.as_deref(), Some("temperature"));
+        assert_eq!(c.state_topic, "bluetooth/device/A4C138000001");
+        assert_eq!(c.value_template, "{{ value_json.temperature }}");
+        assert_eq!(c.device.connections[0].1, "A4:C1:38:00:00:01");
         let (t, c) = entity(
             "homeassistant",
             "bluetooth",
@@ -261,7 +271,7 @@ mod tests {
             "",
         );
         assert!(t.starts_with("homeassistant/binary_sensor/"));
-        assert_eq!(c["device_class"], "door");
+        assert_eq!(c.device_class.as_deref(), Some("door"));
         let (_, c) = entity(
             "homeassistant",
             "bluetooth",
@@ -272,7 +282,7 @@ mod tests {
             "temperature_2",
             "°C",
         );
-        assert_eq!(c["device_class"], "temperature");
+        assert_eq!(c.device_class.as_deref(), Some("temperature"));
         let (_, c) = entity(
             "homeassistant",
             "bluetooth",
@@ -283,6 +293,6 @@ mod tests {
             "energy",
             "kWh",
         );
-        assert_eq!(c["state_class"], "total_increasing");
+        assert_eq!(c.state_class.as_deref(), Some("total_increasing"));
     }
 }
