@@ -46,7 +46,7 @@ jobs:
         run: cargo test -p bluetooth-bridge --features schema --test config_reference
       - name: The MQTT reference is generated from the payload types
         run: cargo test -p bluetooth-bridge --features unstable-asyncapi-docs --test asyncapi
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: The MQTT reference is valid AsyncAPI
@@ -110,7 +110,7 @@ jobs:
           submodules: true
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
